@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculador de Pisos Vinílicos</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Roboto',Arial,sans-serif}
+body{background:#f4f6f8;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:15px}
+.app-card{background:#fff;width:100%;max-width:560px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.08);padding:20px;display:flex;flex-direction:column;gap:15px}
+.header{text-align:center}
+.header h1{color:#0076a3;font-size:24px;font-weight:900;letter-spacing:-.5px;line-height:1.1;text-transform:uppercase}
+.header .subtitle{font-size:11px;font-style:italic;color:#555;margin-top:4px}
+.section-title{font-weight:700;font-size:15px;color:#222;margin-top:5px}
+.field-group{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:13px;color:#333;font-weight:500}
+.input-number-wrapper{display:flex;align-items:center;border:1px solid #0076a3;border-radius:6px;overflow:hidden;background:#fff}
+.input-number-wrapper input{width:100%;border:none;padding:10px;font-size:15px;outline:none;color:#333}
+.btn-step{background:none;border:none;padding:0 12px;font-size:18px;font-weight:bold;color:#0076a3;cursor:pointer;user-select:none;height:40px}
+.btn-step:active{background:#e0f2f7}
+.toggle-group{display:flex;gap:8px}
+.btn-toggle{flex:1;padding:10px 6px;border:1px solid #ccc;background:#f9f9f9;color:#555;font-weight:bold;font-size:13px;border-radius:6px;cursor:pointer;text-align:center;transition:all .2s}
+.btn-toggle.active{background:#006600;color:#fff;border-color:#006600}
+.btn-toggle.blue.active{background:#0076a3;border-color:#0076a3}
+.veta-header{font-size:18px;font-weight:900;text-align:center;margin-top:5px;text-transform:uppercase}
+.veta-header.largo{color:#d35400}.veta-header.ancho{color:#0076a3}
+.veta-img,.banner-img{width:100%;border-radius:6px;display:block;margin-top:2px}
+.results-container{display:flex;flex-direction:column;gap:10px}
+.result-row{display:flex;flex-direction:column;gap:4px}
+.result-label{font-size:12px;color:#333;font-weight:500}
+.result-input{width:100%;padding:8px 10px;font-size:14px;border:1px solid #e0e0e0;border-radius:6px;background:#f9f9f9;color:#555;outline:none}
+.notice-text{font-size:11px;font-weight:700;color:#222;line-height:1.3;margin-top:5px;text-transform:uppercase}
+.hidden{display:none!important}
+.tabs{display:flex;gap:8px}
+.tabs .btn-toggle{font-size:14px;padding:12px}
+/* Simulador */
+.dims{display:flex;gap:8px}
+.dims .field-group{flex:1}
+.dims input{width:100%;border:1px solid #0076a3;border-radius:6px;padding:9px;font-size:15px}
+.formula{background:#eef7fb;border-left:4px solid #0076a3;border-radius:6px;padding:10px 12px;font-size:13px;color:#222;line-height:1.5}
+.formula b{color:#0076a3}
+.formula .fx{font-size:16px;font-weight:900;color:#0076a3}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.tools .btn-toggle{flex:1 1 30%;font-size:12px}
+.stage{border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;overflow:hidden}
+.stage svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.status{padding:10px 12px;border-radius:6px;font-size:14px;font-weight:700;background:#fff4e5;color:#a05a00}
+.status.ok{background:#e6f4e6;color:#006600}
+.status.bad{background:#fdeaea;color:#b00020}
+.hint{font-size:12px;color:#666;text-align:center}
+
+.stp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stp button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 4px;border:2px solid #dce5de;background:#fff;border-radius:12px;cursor:pointer;font-size:13px;position:relative}
+.stp i{font-style:normal;width:22px;height:22px;border-radius:50%;background:#dce5de;display:grid;place-items:center;font-weight:800;font-size:12px}
+.stp b{font-size:10px;color:#5d6b63}.stp span{font-weight:800}
+.stp button:first-child:after{content:"›";position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:800;color:#5d6b63}
+.stp .on{border-color:#f07f0a}.stp .on i{background:#f07f0a;color:#fff}.stp .on b{color:#f07f0a}
+.stp .ok i{background:#0a8f3f;color:#fff}
+.say{background:linear-gradient(135deg,#fff3d6,#ffe2a8);border:2px solid #f07f0a;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;color:#4a2c00;line-height:1.4}
+.say b{color:#c25a00}
+
+.app-card.wide{max-width:780px}
+.stp{grid-template-columns:1fr 1fr 1fr!important;gap:16px!important}
+.stp button:nth-child(2):after{content:"›";position:absolute;right:-13px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:800;color:#5d6b63}
+.col{display:flex;flex-direction:column;gap:12px}
+.chip{font-size:12px;color:#555;text-align:center}
+.sis{overflow-x:auto;border:1px solid #888;border-radius:4px}
+.sis table{border-collapse:collapse;width:100%;min-width:480px;font-size:12px}
+.sis th{background:linear-gradient(#2d4d6e,#1c3550);color:#fff;padding:8px 6px;font-weight:500}
+.sis td{background:#d4d0c8;border:1px solid #fff;padding:6px;text-align:center;color:#222}
+.sis input{width:80px;padding:6px;font-size:15px;font-weight:700;text-align:right;border:2px solid #0076a3;background:#fff;border-radius:3px}
+.fact{background:#006600;color:#fff;border:none;border-radius:8px;padding:14px;font-size:16px;font-weight:900;cursor:pointer}
+.btn-toggle:disabled{opacity:.4;cursor:default}
+.role{text-align:center;font-weight:800;font-size:13px;padding:7px;border-radius:999px;color:#1e2a24}
+#s-formula{background:linear-gradient(135deg,#fff3d6,#ffe2a8);border:2.5px solid #f07f0a;border-radius:12px;padding:12px 14px;box-shadow:0 0 0 4px rgba(240,127,10,.15)}
+#s-formula .fx{font-size:20px;color:#c25a00}
+#s-formula .lbl{font-size:11px;font-weight:800;color:#8a5a00;text-transform:uppercase;letter-spacing:.5px}
+.arr{font-weight:800;color:#006600;text-align:center;margin-top:8px;font-size:14px;animation:bob 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(5px)}}
+.sis input{border-color:#f07f0a;box-shadow:0 0 0 3px rgba(240,127,10,.3)}
+.say.okk{background:#e6f4e6;border-color:#0a8f3f;color:#064b24}
+.blink{animation:bl 1s infinite}@keyframes bl{50%{opacity:.25}}
+
+/* v6: modal de vetas, explicación, botón de corte */
+.vinfo{font-size:12px;color:#444}
+.vinfo a{color:#0076a3;font-weight:700}
+.modal{position:fixed;inset:0;background:rgba(10,20,30,.58);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+.modal-box{background:#fff;border-radius:14px;max-width:780px;width:100%;max-height:92vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.mtitle{font-size:18px;font-weight:900;color:#0076a3;text-align:center}
+.msub{font-size:13px;color:#444;text-align:center}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.opt-grid{grid-template-columns:1fr}}
+.opt-card{display:flex;flex-direction:column;gap:6px;border:2px solid #cfd8dc;border-radius:12px;padding:10px;background:#fff;cursor:pointer;text-align:center}
+.opt-card:hover,.opt-card.sel{border-color:#f07f0a;box-shadow:0 0 0 3px rgba(240,127,10,.2)}
+.opt-t{font-size:15px;font-weight:900}
+.opt-t.largo{color:#d35400}.opt-t.ancho{color:#0076a3}
+.opt-d{font-size:12px;color:#555;line-height:1.3}
+.opt-go{background:#006600;color:#fff;border-radius:8px;padding:9px;font-weight:900;font-size:13px}
+.explain{background:#fffaf0;border-left:4px solid #f07f0a;border-radius:8px;padding:12px 14px;font-size:13px;color:#222;line-height:1.5}
+.ex-title{font-size:15px;font-weight:700}
+.ex-big{font-size:22px;font-weight:900;color:#006600}
+.ex-steps{padding-left:20px;margin:8px 0;display:flex;flex-direction:column;gap:6px}
+.ex-note{background:#fff;border:1px dashed #f07f0a;border-radius:8px;padding:8px 10px;margin-top:6px}
+.ex-cap{font-size:11px;color:#666;text-align:center;margin-top:2px}
+.pulse{animation:pl 1s ease-in-out infinite}@keyframes pl{50%{opacity:.65}}
+
+/* v8 */
+.ico{vertical-align:-3px;margin-right:5px}
+.vwrap{position:relative;margin-top:2px}.vwrap .veta-img{margin-top:0}
+.vsp{position:absolute;top:0;width:0}
+.vnum{position:absolute;white-space:nowrap;background:#fff;border:2px solid;border-radius:999px;font-weight:900;font-size:clamp(11px,3.4vw,19px);line-height:1;padding:.3em .65em;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.vnum-l{left:0;top:100%;transform:translateY(-50%);color:#1e6b1e;border-color:#1e6b1e}
+.vnum-a{left:0;top:100%;transform:translate(-50%,-100%) rotate(180deg);writing-mode:vertical-rl;color:#4a148c;border-color:#4a148c;padding:.65em .2em}
+.vnum.sm{font-size:clamp(9px,2.7vw,15px)}
+.fx-head{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:none;border:none;cursor:pointer;text-align:left;padding:0}
+.chev{flex:none;width:9px;height:9px;border-right:3px solid #8a5a00;border-bottom:3px solid #8a5a00;transform:rotate(45deg);transition:transform .2s;margin:0 4px 3px}
+.chev.open{transform:rotate(-135deg);margin:3px 4px 0}
+.fx-body{margin-top:6px}
+.ex-li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ex-btn{flex:none;background:#0076a3;color:#fff;border:none;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.ex-btn:active{background:#005a7d}
+mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-radius:5px;font-size:1.06em}
+.sm-dots{display:flex;gap:6px;justify-content:center}
+.sm-dots i{width:9px;height:9px;border-radius:50%;background:#cfd8dc}
+.sm-dots i.on{background:#f07f0a}.sm-dots i.past{background:#0a8f3f}
+.sm-vis{background:#f4f6f8;border-radius:10px;padding:8px}
+.sm-text{font-size:15px;line-height:1.55;color:#222}
+.sm-text p+p{margin-top:8px}
+.sm-res{background:#e6f4e6;border:2px solid #0a8f3f;border-radius:10px;padding:10px 12px;font-size:16px;font-weight:700;color:#064b24;text-align:center}
+.sm-nav{display:flex;gap:8px}
+.bigflow{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 6px;font-size:34px;font-weight:900;color:#555}
+.bigflow .ok{color:#006600}.bigflow .ar{color:#f07f0a}
+</style>
+</head>
+<body>
+<div class="app-card">
+  <div class="header">
+    <h1>CALCULADOR<br>DE PISOS VINÍLICOS</h1>
+    <div class="subtitle">By: Capacitación V.E.S.</div>
+  </div>
+
+  <div class="tabs">
+    <button class="btn-toggle blue active" id="tab-b-calc" onclick="showTab('calc')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="5" width="10" height="4" rx="1" fill="currentColor"/><g fill="currentColor"><circle cx="8.5" cy="13" r="1.4"/><circle cx="12" cy="13" r="1.4"/><circle cx="15.5" cy="13" r="1.4"/><circle cx="8.5" cy="17" r="1.4"/><circle cx="12" cy="17" r="1.4"/><circle cx="15.5" cy="17" r="1.4"/></g></svg>Calculadora</button>
+    <button class="btn-toggle blue" id="tab-b-sim" onclick="showTab('sim')">✂️ Simulador</button>
+  </div>
+
+  <!-- ===== CALCULADORA ===== -->
+  <div id="tab-calc" style="display:flex;flex-direction:column;gap:15px">
+    <div class="field-group">
+      <label class="field-label" for="ancho">Ancho del área *</label>
+      <div class="input-number-wrapper">
+        <input type="number" id="ancho" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()">
+        <button class="btn-step" onclick="adjustValue('ancho',-0.5)">−</button>
+        <button class="btn-step" onclick="adjustValue('ancho',0.5)">+</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="largo">Largo del área *</label>
+      <div class="input-number-wrapper">
+        <input type="number" id="largo" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()">
+        <button class="btn-step" onclick="adjustValue('largo',-0.5)">−</button>
+        <button class="btn-step" onclick="adjustValue('largo',0.5)">+</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Priorizar estética</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-estetica-yes" class="btn-toggle" onclick="setPriorizarEstetica('Yes')">Yes</button>
+        <button type="button" id="btn-estetica-no" class="btn-toggle active" onclick="setPriorizarEstetica('No')">No</button>
+      </div>
+    </div>
+    <div id="veta-section" class="field-group hidden">
+      <label class="field-label">Dirección de veta</label>
+      <div class="toggle-group">
+        <button type="button" id="btn-veta-largo" class="btn-toggle active" onclick="setDireccionVeta('En dirección al largo')">En dirección al largo</button>
+        <button type="button" id="btn-veta-ancho" class="btn-toggle" onclick="setDireccionVeta('En dirección al ancho')">En dirección al ancho</button>
+      </div>
+      <div id="container-veta-largo">
+        <div class="veta-header largo">VETAS EN DIRECCIÓN A LO LARGO</div>
+        <div class="vwrap"><img src="https://image2url.com/r2/default/images/1774477413486-f65283b5-7de6-4f6f-abee-12385862ced7.jpg" alt="Vetas a lo largo" class="veta-img"><div class="vsp" style="left:5.9%;padding-top:29%"><span class="vnum vnum-a" data-k="ancho"></span></div><div class="vsp" style="left:56%;padding-top:64.2%"><span class="vnum vnum-l" data-k="largo"></span></div></div>
+      </div>
+      <div id="container-veta-ancho" class="hidden">
+        <div class="veta-header ancho">VETAS EN DIRECCIÓN A LO ANCHO</div>
+        <div class="vwrap"><img src="https://image2url.com/r2/default/images/1774477452466-3048d2ee-9fc2-4aea-ad79-c5bc739f893c.jpg" alt="Vetas a lo ancho" class="veta-img"><div class="vsp" style="left:5.9%;padding-top:29%"><span class="vnum vnum-a" data-k="ancho"></span></div><div class="vsp" style="left:56%;padding-top:64.2%"><span class="vnum vnum-l" data-k="largo"></span></div></div>
+      </div>
+    </div>
+    <div class="section-title">Resultado:</div>
+    <div class="results-container">
+      <div class="result-row"><span class="result-label">Vendes (m2)</span><input type="text" id="res-vendes" class="result-input" value="0" readonly></div>
+      <div class="result-row"><span class="result-label">Le despachan al cliente:</span><input type="text" id="res-despachan" class="result-input" value="0 M lineales x 2 M (ancho de rollo)" readonly></div>
+      <div class="result-row"><span class="result-label">Pegamento o cola vinílica</span><input type="text" id="res-pegamento" class="result-input" value="0 galones" readonly></div>
+    </div>
+    <div class="notice-text">IMPORTANTE: El cálculo de materiales es aproximado. Siempre hay posibilidad que pueda sobrar o faltar material.</div>
+    <img src="https://image2url.com/r2/default/images/1774306178454-b0969afe-ce2f-4f2e-9e3f-aacfb880f5a9.jpg" alt="Capacitación VES" class="banner-img">
+  </div>
+
+  <!-- ===== SIMULADOR ===== -->
+  <div id="tab-sim" style="display:none;flex-direction:column;gap:12px">
+    <nav class="stp">
+      <button id="st1" onclick="goStep(1)"><i>1</i><b>PASO 1</b><span>Cálculo</span></button>
+      <button id="st2" onclick="goStep(2)"><i>2</i><b>PASO 2</b><span>Despacho</span></button>
+      <button id="st3"><i>3</i><b>PASO 3</b><span>Instalación</span></button>
+    </nav>
+    <div class="role" id="s-role"></div>
+    <div id="s1" class="col">
+      <div class="field-group">
+        <label class="field-label">Priorizar estética</label>
+        <div class="toggle-group">
+          <button type="button" id="e-yes" class="btn-toggle" onclick="simEstetica(true)">Sí</button>
+          <button type="button" id="e-no" class="btn-toggle active" onclick="simEstetica(false)">No</button>
+        </div>
+        <div class="vinfo" id="e-info" style="display:none"></div>
+      </div>
+      <div class="dims">
+        <div class="field-group"><label class="field-label">Ancho (m)</label><input type="number" id="s-a" value="3" min="1" max="20" step="0.5" oninput="simReset()" onchange="fixDims()"></div>
+        <div class="field-group"><label class="field-label">Largo (m)</label><input type="number" id="s-l" value="7" min="1" max="20" step="0.5" oninput="simReset()" onchange="fixDims()"></div>
+      </div>
+      <div class="hint">Medidas de 0.5 en 0.5 m · máximo 20 m</div>
+      <div class="formula" id="s-formula"></div>
+      <button type="button" class="btn-toggle blue" id="s-expbtn" onclick="toggleExp()">Ver resultado y cómo se calcula</button>
+      <div class="explain hidden" id="s-explain"></div>
+      <div class="sis"><table>
+        <tr><th>Artículo Pedido</th><th>UDM</th><th>Cantidad</th><th>Peso</th><th>Descripción Artículo</th></tr>
+        <tr><td>SNT.PY.000043</td><td>M2</td><td><input id="s-q" type="number" min="0" step="0.5" oninput="peso()"></td><td id="s-peso">0</td><td>PISO VINILICO LAMIFORT CEREZO X 2.00</td></tr>
+      </table></div>
+      <button class="fact" onclick="facturar()">Facturar</button>
+    </div>
+    <div class="chip" id="s-chip"></div>
+    <div class="say" id="s-say"></div>
+    <div class="tools" id="s-tools"></div>
+    <div class="stage" id="s-stage"><svg id="svg2" xmlns="http://www.w3.org/2000/svg" style="touch-action:none;user-select:none"></svg></div>
+    <div class="status" id="s-status"></div>
+  </div>
+
+</div>
+<div class="modal hidden" id="vm" onclick="if(event.target===this)vetaCancel()">
+  <div class="modal-box">
+    <div class="mtitle">¿Cómo quiere el cliente las vetas?</div>
+    <div class="msub">Así quedaría el piso en el espacio del cliente: <b id="vm-dims"></b></div>
+    <div class="opt-grid">
+      <button type="button" class="opt-card" id="vm-c-largo" onclick="vetaPick('largo')">
+        <div class="opt-t largo">VETAS AL LARGO</div>
+        <div id="vm-p-largo"></div>
+        <div class="opt-d">Las tiras corren en el sentido del largo del cuarto.</div>
+        <div class="opt-go">Elegir al largo</div>
+      </button>
+      <button type="button" class="opt-card" id="vm-c-ancho" onclick="vetaPick('ancho')">
+        <div class="opt-t ancho">VETAS AL ANCHO</div>
+        <div id="vm-p-ancho"></div>
+        <div class="opt-d">Las tiras corren en el sentido del ancho del cuarto.</div>
+        <div class="opt-go">Elegir al ancho</div>
+      </button>
+    </div>
+    <button type="button" class="btn-toggle" onclick="vetaCancel()">Cancelar</button>
+  </div>
+</div>
+<div class="modal hidden" id="sm" onclick="if(event.target===this)stepClose()">
+  <div class="modal-box">
+    <div class="mtitle" id="sm-title"></div>
+    <div class="sm-dots" id="sm-dots"></div>
+    <div class="sm-vis" id="sm-vis"></div>
+    <div class="sm-text" id="sm-text"></div>
+    <div class="sm-res" id="sm-res"></div>
+    <div class="sm-nav">
+      <button type="button" class="btn-toggle" id="sm-prev" onclick="stepNav(-1)">‹ Anterior</button>
+      <button type="button" class="btn-toggle active" id="sm-next" onclick="stepNav(1)">Siguiente ›</button>
+    </div>
+    <button type="button" class="btn-toggle" onclick="stepClose()">Cerrar</button>
+  </div>
+</div>
+<script>
+/* ---------- Calculadora (original) ---------- */
+let priorizarEstetica="No",direccionVeta="En dirección al largo";
+function adjustValue(id,a){const i=document.getElementById(id);let v=parseFloat(i.value)||0;v=Math.max(0,v+a);i.value=v>0?v.toFixed(2):'';calcular()}
+function setPriorizarEstetica(v){priorizarEstetica=v;
+  document.getElementById('btn-estetica-yes').classList.toggle('active',v==='Yes');
+  document.getElementById('btn-estetica-no').classList.toggle('active',v!=='Yes');
+  document.getElementById('veta-section').classList.toggle('hidden',v!=='Yes');calcular()}
+function setDireccionVeta(v){direccionVeta=v;const l=v==='En dirección al largo';
+  document.getElementById('btn-veta-largo').classList.toggle('active',l);
+  document.getElementById('btn-veta-ancho').classList.toggle('active',!l);
+  document.getElementById('container-veta-largo').classList.toggle('hidden',!l);
+  document.getElementById('container-veta-ancho').classList.toggle('hidden',l);calcular()}
+function updVetaNums(){
+  const fv=id=>{const n=parseFloat(document.getElementById(id).value);return n>0?(Math.round(n*100)/100)+' m':''};
+  const vals={ancho:fv('ancho'),largo:fv('largo')};
+  document.querySelectorAll('.vnum').forEach(e=>{const t=vals[e.dataset.k];e.textContent=t;e.style.display=t?'':'none';e.classList.toggle('sm',t.length>5)});
+}
+function calcular(){
+  updVetaNums();
+  const largo=parseFloat(document.getElementById('largo').value)||0,ancho=parseFloat(document.getElementById('ancho').value)||0;
+  if(largo<=0||ancho<=0){document.getElementById('res-vendes').value="0";document.getElementById('res-despachan').value="0 M lineales x 2 M (ancho de rollo)";document.getElementById('res-pegamento').value="0 galones";return}
+  let m2;
+  if(priorizarEstetica==="No")m2=Math.ceil(largo*ancho);
+  else if(direccionVeta==="En dirección al largo")m2=Math.ceil(ancho/2)*largo*2;
+  else m2=Math.ceil(largo/2)*ancho*2;
+  document.getElementById('res-vendes').value=m2;
+  document.getElementById('res-despachan').value=(m2/2)+" M lineales x 2 M (ancho de rollo)";
+  document.getElementById('res-pegamento').value=Math.ceil(largo*ancho/13)+" galones";
+}
+
+/* ---------- Pestañas ---------- */
+function showTab(t){
+  const c=t==='calc';
+  document.getElementById('tab-calc').style.display=c?'flex':'none';
+  document.getElementById('tab-sim').style.display=c?'none':'flex';
+  document.getElementById('tab-b-calc').classList.toggle('active',c);
+  document.getElementById('tab-b-sim').classList.toggle('active',!c);
+  document.querySelector('.app-card').classList.toggle('wide',!c);if(!c)simReset();
+}
+
+/* ---------- Simulador por pasos ---------- */
+const S={a:3,l:7,mode:'area',step:1,billed:0,P:[],A:0,done:false,plan:[],k:0,opDone:false,fin:false,drag:null,hover:null,msg:'',sc:40,W:0,H:0,nid:0,exp:false,fx:false,cutBtn:null};
+const TY=1.2,OX=2.1,RY=TY+3.6,$=id=>document.getElementById(id);
+const fmt=n=>(Math.round(n*100)/100).toString(),snap5=v=>Math.round(v*2)/2,LL=()=>S.billed/2;
+const NAMES={area:'Por área',largo:'Estética · veta al largo',ancho:'Estética · veta al ancho'};
+function m2(){const{a,l,mode}=S;return mode==='area'?Math.ceil(a*l):mode==='largo'?Math.ceil(a/2)*l*2:Math.ceil(l/2)*a*2}
+const FORM={
+ area:["m² = ancho × largo (redondeado hacia arriba)","Sin importar las vetas ni cuántas piezas queden."],
+ largo:["m² = (ancho ÷ 2, redondeado hacia arriba) × largo × 2","Vetas en el sentido del largo. <b>Se compra más m².</b>"],
+ ancho:["m² = (largo ÷ 2, redondeado hacia arriba) × ancho × 2","Vetas en el sentido del ancho. <b>Se compra más m².</b>"]};
+/* Plan de corte: lista de pasos (cortar / girar / colocar) calculada de antemano */
+function buildPlan(mode,l,a,L0){
+  const V=[{id:0,w:L0,h:2}];let nid=1,bad=false;const ops=[],E=1e-9,get=id=>V.find(p=>p.id===id);
+  const cut=(id,ax,at)=>{const p=get(id);at=snap5(at);
+    if(ax==='v'){if(at<=0||at>=p.w)bad=true;V.push({id:nid,w:p.w-at,h:p.h});p.w=at}
+    else{if(at<=0||at>=p.h)bad=true;V.push({id:nid,w:p.w,h:p.h-at});p.h=at}
+    ops.push({t:'cut',id,ax,at});return nid++};
+  const rot=id=>{const p=get(id),t=p.w;p.w=p.h;p.h=t;ops.push({t:'rot',id})};
+  const put=(id,x,y)=>ops.push({t:'put',id,x,y});
+  let cur=0;
+  if(mode==='largo'){const n=Math.ceil(a/2);
+    for(let k=0;k<n;k++){const rh=Math.min(2,a-2*k),row=cur;if(k<n-1)cur=cut(cur,'v',l);if(rh<2)cut(row,'h',rh);put(row,0,2*k)}}
+  else if(mode==='ancho'){const n=Math.ceil(l/2);
+    for(let k=0;k<n;k++){const cw=Math.min(2,l-2*k),col=cur;if(k<n-1)cur=cut(cur,'v',a);if(cw<2)cut(col,'h',cw);rot(col);put(col,2*k,0)}}
+  else{const nf=Math.floor(a/2),r=a-2*nf;
+    for(let k=0;k<nf;k++){const row=cur;if(get(cur).w>l+E)cur=cut(cur,'v',l);put(row,0,2*k)}
+    if(r>E){let need=l,x=0,sub=cur;
+      while(need>E){if(sub==null||get(sub).h<r-E){bad=true;break}
+        let nxt=null;if(get(sub).h>r+E)nxt=cut(sub,'h',r);
+        if(get(sub).w>need+E)cut(sub,'v',need);
+        put(sub,x,2*nf);x+=get(sub).w;need-=get(sub).w;sub=nxt}}}
+  return bad?null:ops;
+}
+function apply(op){const p=S.P.find(q=>q.id===op.id);
+  if(op.t==='cut'){if(op.ax==='v'){S.P.push({...p,id:S.nid++,x:p.x+op.at,w:p.w-op.at});p.w=op.at}else{S.P.push({...p,id:S.nid++,y:p.y+op.at,h:p.h-op.at});p.h=op.at}}
+  else if(op.t==='rot'){const t=p.w;p.w=p.h;p.h=t;p.g=p.g==='h'?'v':'h';p.y=TY}
+  else{p.x=OX+op.x;p.y=RY+op.y;p.locked=true}
+}
+function setMode(m){S.mode=m;simReset()}
+const sn=v=>Math.round(v*2)/2;
+function fixDims(){$('s-a').value=S.a;$('s-l').value=S.l}
+function simEstetica(yes){if(yes)openVeta();else{if(S.mode!=='area')setMode('area');else refresh()}}
+function openVeta(){
+  $('vm-dims').textContent='ancho '+fmt(S.a)+' m × largo '+fmt(S.l)+' m';
+  $('vm-p-largo').innerHTML=roomSVG('largo',S.a,S.l);$('vm-p-ancho').innerHTML=roomSVG('ancho',S.a,S.l);
+  $('vm-c-largo').classList.toggle('sel',S.mode==='largo');$('vm-c-ancho').classList.toggle('sel',S.mode==='ancho');
+  $('vm').classList.remove('hidden');
+}
+function vetaPick(m){$('vm').classList.add('hidden');setMode(m)}
+function vetaCancel(){$('vm').classList.add('hidden');refresh()}
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('sm').classList.contains('hidden'))stepClose();else if(!$('vm').classList.contains('hidden'))vetaCancel()});
+function fSteps(){
+  const a=S.a,l=S.l,B=x=>'<b>'+x+'</b>',q=m2();let r=[];
+  if(S.mode==='area'){
+    r=['Multiplica ancho × largo: '+fmt(a)+' × '+fmt(l)+' = '+B(fmt(a*l)),'Redondea hacia arriba (sin decimales): '+B(q+' m²')];
+  }else{
+    const lg=S.mode==='largo',cross=lg?a:l,len=lg?l:a,n=Math.ceil(cross/2);
+    r=['¿Cuántas tiras de 2 m caben en el <u>'+(lg?'ancho':'largo')+'</u>? '+fmt(cross)+' ÷ 2 = '+fmt(cross/2)+(Number.isInteger(cross/2)?'':' → se sube al entero siguiente')+' = '+B(n+(n===1?' tira':' tiras')),
+       'Cada tira mide el <u>'+(lg?'largo':'ancho')+'</u> ('+fmt(len)+' m): '+n+' × '+fmt(len)+' = '+B(fmt(n*len)+' metros lineales'),
+       'Cada metro lineal del rollo son 2 m²: '+fmt(n*len)+' × 2 = '+B(q+' m²')];
+  }
+  return '<ol style="padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:14px;margin-top:4px">'+r.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+}
+function hintMal(q){
+  if(S.mode==='area')return '';
+  const lg=S.mode==='largo',cross=lg?S.a:S.l,len=lg?S.l:S.a;
+  if(Math.abs(q-cross*len*2)<1e-9)return ' Parece que multiplicaste el '+(lg?'ancho':'largo')+' completo ('+fmt(cross)+'). Primero se divide entre 2: '+fmt(cross)+' ÷ 2 = '+fmt(cross/2)+(Number.isInteger(cross/2)?'':' (se redondea hacia arriba)')+'.';
+  if(Math.abs(q-Math.ceil(S.a*S.l))<1e-9)return ' Ese es el área del cuarto. Con estética se compran tiras completas.';
+  return ' Usa el botón «Ver resultado» para ver el paso a paso.';
+}
+function toggleFx(){S.fx=!S.fx;refresh()}
+function toggleExp(){S.exp=!S.exp;refresh()}
+/* Dibujo del cuarto del cliente con tiras de 2 m (vista previa) */
+let _uid=0;
+function roomSVG(mode,a,l,o){
+  o=o||{};
+  const lg=mode==='largo',cross=lg?a:l,n=Math.ceil(cross/2),lastC=cross-2*(n-1),wl=o.waste&&lastC<2?2-lastC:0;
+  const mx=Math.max(l,a),M=mx*.1+.35,wx=lg?0:wl,wy=lg?wl:0,vw=l+2*M+wx,vh=a+2*M+wy,B=Math.max(vw,vh),fs=B/24,lw=B/260,hid='ht'+(++_uid);
+  let h='<svg viewBox="0 0 '+vw+' '+vh+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">';
+  h+='<defs><pattern id="'+hid+'" width="'+(B/55)+'" height="'+(B/55)+'" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="'+(B/55)+'" stroke="#d11" stroke-width="'+(B/260)+'"/></pattern></defs>';
+  h+='<rect x="'+(M-lw*2)+'" y="'+(M-lw*2)+'" width="'+(l+lw*4)+'" height="'+(a+lw*4)+'" fill="#4a545c"/>';
+  for(let k=0;k<n;k++){
+    let x,y,w,hh;
+    if(lg){x=M;y=M+2*k;w=l;hh=Math.min(2,a-2*k)}else{x=M+2*k;y=M;w=Math.min(2,l-2*k);hh=a}
+    const dim=o.hl&&o.hl.indexOf(k)<0;
+    h+='<g opacity="'+(dim?.28:1)+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+hh+'" fill="'+(k%2?'#c99560':'#d6a66f')+'"/>';
+    if(lg)for(let yy=y+.125;yy<y+hh;yy+=.25)h+='<line x1="'+x+'" y1="'+yy+'" x2="'+(x+w)+'" y2="'+yy+'" stroke="#6b3f1c" stroke-opacity=".35" stroke-width="'+lw+'"/>';
+    else for(let xx=x+.125;xx<x+w;xx+=.25)h+='<line x1="'+xx+'" y1="'+y+'" x2="'+xx+'" y2="'+(y+hh)+'" stroke="#6b3f1c" stroke-opacity=".35" stroke-width="'+lw+'"/>';
+    h+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+hh+'" fill="none" stroke="#fff" stroke-width="'+(lw*1.6)+'"/></g>';
+    if(o.hl&&!dim)h+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+hh+'" fill="none" stroke="#f07f0a" stroke-width="'+(lw*4)+'"/>';
+    if(o.num){const cx=lg?x+fs*1.4:x+w/2,cy=lg?y+hh/2:y+fs*1.4;
+      h+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(fs*.85)+'" fill="#fff" stroke="#f07f0a" stroke-width="'+(lw*3)+'"/><text x="'+cx+'" y="'+(cy+fs*.35)+'" text-anchor="middle" font-size="'+(fs*1.1)+'" font-weight="900" fill="#c25a00">'+(k+1)+'</text>';}
+    if(o.dimStrip&&!dim){const len=lg?l:a,t=fs*.35;
+      if(lg){const yy=y+hh/2;h+='<g stroke="#d35400" stroke-width="'+(lw*3)+'"><line x1="'+x+'" y1="'+yy+'" x2="'+(x+w)+'" y2="'+yy+'"/><line x1="'+x+'" y1="'+(yy-t)+'" x2="'+x+'" y2="'+(yy+t)+'"/><line x1="'+(x+w)+'" y1="'+(yy-t)+'" x2="'+(x+w)+'" y2="'+(yy+t)+'"/></g>';
+        h+='<rect x="'+(x+w/2-fs*2.4)+'" y="'+(yy-fs*.9)+'" width="'+(fs*4.8)+'" height="'+(fs*1.8)+'" rx="'+(fs*.9)+'" fill="#fff" stroke="#d35400" stroke-width="'+(lw*2)+'"/><text x="'+(x+w/2)+'" y="'+(yy+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#c25a00">'+fmt(len)+' m</text>';}
+      else{const xx=x+w/2;h+='<g stroke="#d35400" stroke-width="'+(lw*3)+'"><line x1="'+xx+'" y1="'+y+'" x2="'+xx+'" y2="'+(y+hh)+'"/><line x1="'+(xx-t)+'" y1="'+y+'" x2="'+(xx+t)+'" y2="'+y+'"/><line x1="'+(xx-t)+'" y1="'+(y+hh)+'" x2="'+(xx+t)+'" y2="'+(y+hh)+'"/></g>';
+        h+='<rect x="'+(xx-fs*2.4)+'" y="'+(y+hh/2-fs*.9)+'" width="'+(fs*4.8)+'" height="'+(fs*1.8)+'" rx="'+(fs*.9)+'" fill="#fff" stroke="#d35400" stroke-width="'+(lw*2)+'"/><text x="'+xx+'" y="'+(y+hh/2+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#c25a00">'+fmt(len)+' m</text>';}}
+  }
+  if(wl>0){
+    const wx0=lg?M:M+l,wy0=lg?M+a:M,ww=lg?l:wl,wh=lg?wl:a;
+    h+='<rect x="'+wx0+'" y="'+wy0+'" width="'+ww+'" height="'+wh+'" fill="url(#'+hid+')" stroke="#d11" stroke-width="'+(lw*2)+'" stroke-dasharray="'+(lw*6)+' '+(lw*4)+'"/>';
+    h+='<text x="'+(wx0+ww/2)+'" y="'+(wy0+wh/2+fs*.35)+'" text-anchor="middle" font-size="'+(fs*.9)+'" font-weight="900" fill="#d11" stroke="#fff" stroke-width="'+(lw*3)+'" paint-order="stroke">sobra</text>';
+  }
+  if(!o.hl&&!o.num){const tx=lg?'↔ vetas':'↕ vetas',pw=fs*5.4,ph=fs*1.8,cx=M+l/2,cy=M+a/2;
+    h+='<rect x="'+(cx-pw/2)+'" y="'+(cy-ph/2)+'" width="'+pw+'" height="'+ph+'" rx="'+(ph/2)+'" fill="#fff" opacity=".9"/><text x="'+cx+'" y="'+(cy+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#222">'+tx+'</text>';}
+  h+='<text x="'+(M+l/2)+'" y="'+(M+a+wy+M*.65)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#d11">'+fmt(l)+' m</text>';
+  h+='<text transform="translate('+(M*.45)+' '+(M+a/2)+') rotate(-90)" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#0a8f3f">'+fmt(a)+' m</text>';
+  return h+'</svg>';
+}
+/* Cuadrícula de 1 m² (modo por área) */
+function gridSVG(a,l){
+  const M=Math.max(l,a)*.1+.35,vw=l+2*M,vh=a+2*M,B=Math.max(vw,vh),fs=B/24,lw=B/260;
+  let h='<svg viewBox="0 0 '+vw+' '+vh+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><rect x="'+M+'" y="'+M+'" width="'+l+'" height="'+a+'" fill="#d6a66f"/>';
+  for(let i=1;i<l;i++)h+='<line x1="'+(M+i)+'" y1="'+M+'" x2="'+(M+i)+'" y2="'+(M+a)+'" stroke="#fff" stroke-width="'+lw+'"/>';
+  for(let j=1;j<a;j++)h+='<line x1="'+M+'" y1="'+(M+j)+'" x2="'+(M+l)+'" y2="'+(M+j)+'" stroke="#fff" stroke-width="'+lw+'"/>';
+  h+='<rect x="'+M+'" y="'+M+'" width="1" height="1" fill="rgba(240,127,10,.45)" stroke="#f07f0a" stroke-width="'+(lw*4)+'"/>';
+  h+='<rect x="'+M+'" y="'+M+'" width="'+l+'" height="'+a+'" fill="none" stroke="#4a545c" stroke-width="'+(lw*3)+'"/>';
+  h+='<text x="'+(M+l/2)+'" y="'+(M+a+M*.65)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#d11">'+fmt(l)+' m</text>';
+  h+='<text transform="translate('+(M*.45)+' '+(M+a/2)+') rotate(-90)" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#0a8f3f">'+fmt(a)+' m</text>';
+  return h+'</svg>';
+}
+/* Barra del rollo: n tiras una detrás de otra */
+function barSVG(n,len,o){
+  o=o||{};const T=n*len,M=Math.max(T*.07,.8),v0=T+2*M,barH=Math.max(2,v0/7),vh=barH+M*3,B=Math.max(v0,vh*1.6),fs=B/26,lw=B/300,X0=Math.max(M,fs*2.4),vw=T+X0+M;
+  let h='<svg viewBox="0 0 '+vw+' '+vh+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">';
+  for(let k=0;k<n;k++){const x=X0+k*len;
+    h+='<rect x="'+x+'" y="'+M+'" width="'+len+'" height="'+barH+'" fill="'+(o.area?'#8fd19e':(k%2?'#c99560':'#d6a66f'))+'" stroke="#fff" stroke-width="'+(lw*2)+'"/>';
+    if(n>1&&!o.area&&len>fs*3)h+='<text x="'+(x+len/2)+'" y="'+(M+barH/2+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#fff" stroke="#4a2c12" stroke-width="'+(lw*3)+'" paint-order="stroke">tira '+(k+1)+'</text>';}
+  const ty=M+barH+M*.9;
+  h+='<g stroke="#0a8f3f" stroke-width="'+(lw*3)+'"><line x1="'+X0+'" y1="'+ty+'" x2="'+(X0+T)+'" y2="'+ty+'"/><line x1="'+X0+'" y1="'+(ty-fs*.4)+'" x2="'+X0+'" y2="'+(ty+fs*.4)+'"/><line x1="'+(X0+T)+'" y1="'+(ty-fs*.4)+'" x2="'+(X0+T)+'" y2="'+(ty+fs*.4)+'"/></g>';
+  const lab=o.label||(n>1?n+' × '+fmt(len)+' = '+fmt(T)+' M':fmt(T)+' M');
+  const lw2=fs*(lab.length*.6+1.4);
+  h+='<rect x="'+(X0+T/2-lw2/2)+'" y="'+(ty-fs*.95)+'" width="'+lw2+'" height="'+(fs*1.9)+'" rx="'+(fs*.95)+'" fill="#fff" stroke="#0a8f3f" stroke-width="'+(lw*2)+'"/><text x="'+(X0+T/2)+'" y="'+(ty+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#0a6b30">'+lab+'</text>';
+  const hx=X0-fs*1.1;
+  h+='<g stroke="#d11" stroke-width="'+(lw*3)+'"><line x1="'+hx+'" y1="'+M+'" x2="'+hx+'" y2="'+(M+barH)+'"/><line x1="'+(hx-fs*.4)+'" y1="'+M+'" x2="'+(hx+fs*.4)+'" y2="'+M+'"/><line x1="'+(hx-fs*.4)+'" y1="'+(M+barH)+'" x2="'+(hx+fs*.4)+'" y2="'+(M+barH)+'"/></g>';
+  h+='<text transform="translate('+(hx-fs*.7)+' '+(M+barH/2)+') rotate(-90)" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#d11">2 m</text>';
+  if(o.area){const t=o.area,tw=fs*(t.length*.62+1.6);h+='<rect x="'+(X0+T/2-tw/2)+'" y="'+(M+barH/2-fs)+'" width="'+tw+'" height="'+(fs*2)+'" rx="'+fs+'" fill="#fff" stroke="#006600" stroke-width="'+(lw*3)+'"/><text x="'+(X0+T/2)+'" y="'+(M+barH/2+fs*.38)+'" text-anchor="middle" font-size="'+(fs*1.1)+'" font-weight="900" fill="#006600">'+t+'</text>';}
+  return h+'</svg>';
+}
+/* Explicación paso a paso del resultado */
+function stepsData(){
+  const a=S.a,l=S.l,q=m2(),mode=S.mode,B=x=>'<b>'+x+'</b>',D=[];
+  if(mode==='area'){
+    const raw=a*l,int=Number.isInteger(raw);
+    D.push({title:'Multiplica ancho × largo',short:'Multiplica el ancho por el largo del cuarto: '+fmt(a)+' × '+fmt(l)+' = '+B(fmt(raw)+' m²')+'.',
+      vis:gridSVG(a,l)+'<div class="ex-cap">Cada cuadradito es 1 m²</div>',
+      txt:'<p>Imagina el piso del cuarto dividido en cuadraditos de <b>1 m × 1 m</b>. Cada cuadradito es <b>1 m²</b>.</p><p>Para saber cuántos hay, multiplicas los que caben a lo ancho ('+fmt(a)+') por los que caben a lo largo ('+fmt(l)+').</p>',
+      res:fmt(a)+' × '+fmt(l)+' = '+fmt(raw)+' m²'});
+    D.push({title:'Redondea hacia arriba',short:int?'Ya es un número entero, no hace falta redondear: '+B(q+' m²')+'.':'No se vende en fracciones, así que se redondea hacia arriba: '+B(q+' m²')+'.',
+      vis:'<div class="bigflow"><span>'+fmt(raw)+'</span><span class="ar">→</span><span class="ok">'+q+' m²</span></div>',
+      txt:int?'<p>Como '+fmt(raw)+' ya es un número entero, no hay nada que redondear.</p><p>Se factura <b>'+q+' m²</b>.</p>':'<p>El piso no se vende por pedacitos. Si el resultado trae decimales, igual se factura el <b>número entero siguiente</b>.</p><p>Siempre sube, nunca baja: '+fmt(raw)+' pasa a '+q+'.</p>',
+      res:'Cantidad a escribir: '+q+' m²'});
+    D.push({title:'¿Cuánto se despacha?',short:'Se despachan '+q+' ÷ 2 = '+B(fmt(q/2)+' M lineales')+' del rollo (paso 2).',
+      vis:barSVG(1,q/2,{label:fmt(q/2)+' M lineales'}),
+      txt:'<p>El rollo mide <b>2 m de ancho</b>. Cada metro que se estira del rollo da 2 m².</p><p>Por eso divides los m² entre 2 para saber cuántos <b>metros lineales</b> se cortan.</p>',
+      res:q+' ÷ 2 = '+fmt(q/2)+' M lineales'});
+    return D;
+  }
+  const lg=mode==='largo',cross=lg?a:l,len=lg?l:a,n=Math.ceil(cross/2),T=n*len,sob=q-a*l,area=Math.ceil(a*l),ex=Number.isInteger(cross/2);
+  const hlq='<mark class="hl">pero se compran '+q+' m²</mark>';
+  D.push({title:'¿Cuánto mide cada tira?',short:'Vetas '+(lg?'al largo':'al ancho')+': cada tira va en el sentido de las vetas, así que mide '+B(fmt(len)+' m')+' ('+(lg?'el largo':'el ancho')+' del cuarto).',
+    vis:roomSVG(mode,a,l,{hl:[0],dimStrip:true})+'<div class="ex-cap">Una tira (marcada en naranja) con sus vetas</div>',
+    txt:'<p>Con vetas '+(lg?'al largo':'al ancho')+', las tiras se colocan <b>en el mismo sentido de las vetas</b>: '+(lg?'acostadas, de pared a pared a lo largo del cuarto.':'de lado a lado, a lo ancho del cuarto.')+'</p><p>Por eso cada tira mide lo mismo que '+(lg?'el largo':'el ancho')+' del cuarto: <b>'+fmt(len)+' m</b>.</p><p>Cada tira se corta completa, sin juntar pedazos, para que todas las vetas queden iguales.</p>',
+    res:'Cada tira mide '+fmt(len)+' m'});
+  D.push({title:'¿Cuántas tiras necesito?',short:'El rollo mide 2 m de ancho y el lado que hay que cubrir mide '+fmt(cross)+' m ('+(lg?'el ancho':'el largo')+' del cuarto). '+fmt(cross)+' ÷ 2 = '+fmt(cross/2)+(ex?'':' → se redondea hacia arriba')+': '+B(n+(n===1?' tira':' tiras'))+'.',
+    vis:roomSVG(mode,a,l,{num:true,waste:true})+'<div class="ex-cap">Tiras numeradas'+(ex?'':' · la zona rayada es lo que sobra')+'</div>',
+    txt:'<p>Cada tira cubre <b>2 m</b> (el ancho del rollo). El lado que hay que cubrir mide <b>'+fmt(cross)+' m</b> ('+(lg?'el ancho':'el largo')+' del cuarto).</p><p>Dividimos: <b>'+fmt(cross)+' ÷ 2 = '+fmt(cross/2)+'</b>.</p>'+(ex?'<p>Da justo, sin decimales: no sobra nada a ese lado.</p>':'<p>Da con decimales y <b>no se puede comprar media tira</b>. Se compra la tira completa y se corta lo que sobra (zona rayada). Por eso se redondea hacia arriba: <b>'+n+' tiras</b>.</p>'),
+    res:n+(n===1?' tira':' tiras')});
+  D.push({title:'Metros lineales',short:'Metros lineales: '+n+' tiras × '+fmt(len)+' m = '+B(fmt(T)+' M')+'.',
+    vis:barSVG(n,len)+'<div class="ex-cap">Las tiras una detrás de otra, como salen del rollo</div>',
+    txt:'<p><b>Metros lineales</b> son los metros de rollo que se gastan.</p><p>Si pones las '+n+(n===1?' tira':' tiras')+' una detrás de otra, cada una de '+fmt(len)+' m, el rollo que se usa mide '+n+' × '+fmt(len)+' = <b>'+fmt(T)+' M</b>.</p>',
+    res:n+' × '+fmt(len)+' = '+fmt(T)+' M lineales'});
+  D.push({title:'Pasa a m²',short:'Metros cuadrados: '+fmt(T)+' M × 2 m (ancho del rollo) = '+B(q+' m²')+'.',
+    vis:barSVG(n,len,{area:q+' m²',label:fmt(T)+' M × 2 m'}),
+    txt:'<p>El rollo mide 2 m de ancho, así que <b>cada metro lineal cubre 2 m²</b>.</p><p>Multiplicas: '+fmt(T)+' × 2 = <b>'+q+' m²</b>.</p><p>El cuarto tiene '+fmt(a*l)+' m², '+hlq+': sobran '+fmt(sob)+' m² de retazos. Es el precio de que todas las vetas queden en la misma dirección.</p>',
+    res:'Cantidad a escribir: '+q+' m²'});
+  D.push({title:'¿Cuánto se despacha?',short:'Se despachan '+q+' ÷ 2 = '+B(fmt(q/2)+' M lineales')+' del rollo (paso 2).',
+    vis:barSVG(1,q/2,{label:fmt(q/2)+' M lineales'}),
+    txt:'<p>Lo que despacha el almacén es el rollo, medido en metros lineales: '+q+' ÷ 2 = <b>'+fmt(q/2)+' M</b>.</p><p>Es el mismo número del paso 3. En el paso 2 del simulador estiras justo esa medida.</p>',
+    res:q+' ÷ 2 = '+fmt(q/2)+' M lineales'});
+  return D;
+}
+function explain(){
+  const a=S.a,l=S.l,q=m2(),mode=S.mode,D=stepsData();let note='',pv='';
+  if(mode==='area'){if(!buildPlan('area',l,a,q/2))note='⚠ Con estas medidas no se puede armar por área sin juntar retazos. Conviene priorizar estética (Sí).'}
+  else{
+    const area=Math.ceil(a*l),sob=q-a*l;
+    note='El cuarto tiene '+fmt(a*l)+' m², <mark class="hl">pero se compran '+q+' m²</mark>: sobran '+fmt(sob)+' m² de retazos. Por área serían '+area+' m² ('+(q-area)+' m² menos), pero habría que unir retazos y el acabado no sería tan uniforme.';
+    pv='<div style="max-width:380px;margin:8px auto 0">'+roomSVG(mode,a,l)+'<div class="ex-cap">Así quedan las tiras de 2 m en el cuarto</div></div>';
+  }
+  return '<div class="ex-title">Cantidad a escribir: <span class="ex-big">'+q+' m²</span></div><ol class="ex-steps">'+D.map((x,i)=>'<li><div class="ex-li"><span>'+x.short+'</span><button type="button" class="ex-btn" onclick="stepOpen('+i+')">Explicar</button></div></li>').join('')+'</ol>'+pv+(note?'<div class="ex-note">'+note+'</div>':'');
+}
+let SM=0;
+function stepOpen(i){SM=i;stepRender();$('sm').classList.remove('hidden')}
+function stepClose(){$('sm').classList.add('hidden')}
+function stepNav(d){const n=stepsData().length;SM=Math.max(0,Math.min(n-1,SM+d));stepRender()}
+function stepRender(){
+  const D=stepsData(),s=D[SM];
+  $('sm-title').textContent='Paso '+(SM+1)+' de '+D.length+': '+s.title;
+  $('sm-dots').innerHTML=D.map((x,i)=>'<i class="'+(i===SM?'on':(i<SM?'past':''))+'"></i>').join('');
+  $('sm-vis').innerHTML=s.vis;$('sm-text').innerHTML=s.txt;$('sm-res').textContent=s.res;
+  $('sm-prev').disabled=SM===0;$('sm-next').disabled=SM===D.length-1;
+}
+function syncEst(){
+  const est=S.mode!=='area';
+  $('e-yes').classList.toggle('active',est);$('e-no').classList.toggle('active',!est);
+  const i=$('e-info');
+  if(est){i.style.display='';i.innerHTML='Vetas elegidas: <b>'+(S.mode==='largo'?'al largo':'al ancho')+'</b> · <a href="#" onclick="openVeta();return false">Cambiar</a>'}else i.style.display='none';
+  $('s-expbtn').textContent=S.exp?'Ocultar resultado':'Ver resultado y cómo se calcula';
+  const ex=$('s-explain');ex.classList.toggle('hidden',!S.exp);if(S.exp)ex.innerHTML=explain();
+}
+const MAXD=20;
+function resetInstall(){
+  clearTimeout(S.tm);if(S.raf)cancelAnimationFrame(S.raf);
+  S.fin=false;S.play=false;S.raf=null;S.fp=[];S.t=0;S.drag=null;S.hover=null;
+  S.plan=[];S.P=[];S.k=0;S.opDone=false;S.nid=0;S.A=0;S.done=false;
+}
+function simReset(){
+  resetInstall();
+  const ra=parseFloat($('s-a').value),rl=parseFloat($('s-l').value);
+  S.a=Math.max(1,Math.min(MAXD,sn(ra||3)));
+  S.l=Math.max(1,Math.min(MAXD,sn(rl||7)));
+  S.step=1;S.billed=0;
+  S.msg=(ra>MAXD||rl>MAXD)?'El máximo es '+MAXD+' m':'';
+  refresh();
+}
+function peso(){$('s-peso').textContent=fmt((parseFloat($('s-q').value)||0)*.59)}
+function facturar(){
+  const q=parseFloat($('s-q').value);S.bad=true;
+  if(!(q>0))S.msg='Escribe la cantidad en m²';
+  else if(S.mode==='area'&&!buildPlan('area',S.l,S.a,Math.ceil(S.a*S.l)/2))S.msg='Con estas medidas no se puede armar por área: prioriza estética (Sí)';
+  else if(Math.abs(q-m2())>1e-9)S.msg='✘ La cantidad no coincide con el cálculo.'+hintMal(q);
+  else{resetInstall();S.billed=q;S.step=2;S.A=0;S.done=false;S.msg='';S.bad=false;S.exp=false}
+  refresh();
+}
+function goStep(n){
+  if(n>=S.step)return;
+  resetInstall();
+  if(n===1){S.step=1;S.billed=0}else{S.step=2;S.A=0;S.done=false}
+  S.msg='';refresh();
+}
+function toStep3(){
+  if(!S.done)return;
+  resetInstall();S.done=true;
+  S.step=3;S.plan=buildPlan(S.mode,S.l,S.a,LL());S.P=[{id:0,x:OX,y:TY,w:LL(),h:2,g:'h'}];S.nid=1;S.k=0;S.opDone=false;S.fin=false;S.msg='';refresh();
+}
+const ltr=id=>String.fromCharCode(65+id%26);
+function refresh(){
+  const s=S.step,v=m2(),f=FORM[S.mode];if(!S.fin)S.play=false;$('s-say').className='say';syncEst();
+  $('s-role').textContent=['','🧑‍💼 Modo: Asesor de ventas','📦 Modo: Despachador','🏠 Modo: Cliente'][s];$('s-role').style.background=['','#e0f0fb','#fff3d6','#e6f4e6'][s];
+  $('s1').style.display=s===1?'flex':'none';
+  ['s-chip','s-say','s-tools','s-stage'].forEach(i=>$(i).style.display=s>1?'':'none');
+  ['st1','st2','st3'].forEach((id,i)=>$(id).className=i+1===s?'on':(i+1<s?'ok':''));
+  document.querySelector('.app-card').classList.toggle('wide',s>1);
+  $('s-formula').innerHTML='<button type="button" class="fx-head" onclick="toggleFx()"><span class="lbl">Cómo hallar los m² (con tus medidas)</span><i class="chev'+(S.fx?' open':'')+'"></i></button>'+(S.fx?'<div class="fx-body">'+fSteps()+'<div style="font-size:12px;color:#8a5a00;margin-top:6px">En resumen: '+f[0]+'. '+f[1]+'</div></div>':'')+'<div class="arr">↓ Ese resultado lo escribes en <b>Cantidad</b></div>';
+  $('s-chip').innerHTML='Facturado <b>'+S.billed+' m²</b> · '+NAMES[S.mode];
+  const b=(c,t,fn,d)=>'<button class="btn-toggle'+c+'" onclick="'+fn+'"'+(d?' disabled':'')+'>'+t+'</button>';
+  if(s===2){
+    $('s-say').innerHTML='Como estás en modo despachador, estira el rollo hasta la medida facturada: <b>'+S.billed+' m² ÷ 2 = '+fmt(LL())+' M</b>. Al llegar al tope, toca <b>✂️ Toca para cortar</b> en el centro del rollo.';
+    $('s-tools').innerHTML=b(' blue','⬅ Enrollar','unroll(-.5)',S.done)+b(' blue','Desenrollar ➡','unroll(.5)',S.done)+b(' blue','✂️ Toca para cortar','cutRoll()',S.done)+b(' active','Siguiente ›','toStep3()',!S.done);
+  }else if(s===3){
+    const op=S.plan[S.k],L=ltr(op.id);
+    let t,btn='';
+    if(op.t==='cut'){t='Corta la pieza <b>'+L+'</b> a <b>'+fmt(op.at)+' M</b> '+(op.ax==='v'?'desde su borde izquierdo':'desde su borde de arriba');btn=b(' blue','✂️ Cortar','doOp()',S.opDone)}
+    else if(op.t==='rot'){t='Gira la pieza <b>'+L+'</b> para que las vetas queden bien';btn=b(' blue','⟳ Girar','doOp()',S.opDone)}
+    else t='✋ Arrastra la pieza <b>'+L+'</b> al lugar marcado';
+    $('s-say').className='say'+(S.fin||S.opDone?' okk':'');
+    $('s-say').innerHTML=S.fin?'✔ <b>¡Instalaste todo el piso!</b> Mira cómo quedó el cuarto.':S.opDone?'✔ <b>¡Bien hecho!</b>':'<b>'+(S.k+1)+'/'+S.plan.length+'</b> · '+t;
+    const th=S.fin?b(' active',S.play?'⏸ Pausar':'▶ Ver cuarto instalado','togglePlay()')+b('','🔄 Empezar de nuevo','simReset()'):(S.opDone?'':btn);
+    $('s-tools').innerHTML=th;$('s-tools').style.display=th?'':'none';
+  }
+  draw();
+}
+function unroll(d){if(S.step!==2||S.done)return;const n=S.A+d;if(n<-1e-9||n>LL()+1e-9)return;S.A=n;S.msg='';draw()}
+function cutRoll(){
+  if(S.step!==2||S.done)return;
+  if(S.A<=0){S.msg='Primero desenrolla el rollo';S.bad=true;draw();return}
+  const d=LL()-S.A;
+  if(Math.abs(d)<1e-9){S.done=true;S.msg=''}else{S.msg='Faltan '+fmt(d)+' M';S.bad=true}
+  refresh();
+}
+function finishOp(){S.opDone=true;refresh();clearTimeout(S.tm);S.tm=setTimeout(()=>{if(S.step===3&&S.opDone&&!S.fin)nextOp()},700)}
+function doOp(){const op=S.plan[S.k];if(S.opDone||op.t==='put')return;apply(op);finishOp()}
+function nextOp(){if(!S.opDone)return;if(S.k<S.plan.length-1){S.k++;S.opDone=false}else S.fin=true;refresh()}
+function wood(x,y,w,h,g,lab,fx,sel,dim){const sc=S.sc,X=x*sc,Y=y*sc,Wd=w*sc,Ht=h*sc;
+ return '<g'+(fx?' filter="url(#sh)"':'')+(dim?' opacity=".6"':'')+'><rect x="'+X+'" y="'+Y+'" width="'+Wd+'" height="'+Ht+'" fill="url(#wd)" stroke="'+(sel?'#f07f0a':'#fff')+'" stroke-width="'+(sel?5:2)+'"/><rect x="'+X+'" y="'+Y+'" width="'+Wd+'" height="'+Ht+'" fill="url(#g'+g+')"/>'
+ +(lab?'<text x="'+(X+Wd/2)+'" y="'+(Y+Ht/2+5)+'" text-anchor="middle" font-size="15" font-weight="900" fill="#fff" stroke="#4a2c12" stroke-width="3" paint-order="stroke">'+lab+'</text>':'')+'</g>'}
+function dim(x1,y1,x2,y2,txt,c){const f=v=>v*S.sc,hz=y1===y2,t=.15;
+ let s='<g stroke="'+c+'" stroke-width="2.5"><line x1="'+f(x1)+'" y1="'+f(y1)+'" x2="'+f(x2)+'" y2="'+f(y2)+'"/>';
+ s+=hz?'<line x1="'+f(x1)+'" y1="'+f(y1-t)+'" x2="'+f(x1)+'" y2="'+f(y1+t)+'"/><line x1="'+f(x2)+'" y1="'+f(y2-t)+'" x2="'+f(x2)+'" y2="'+f(y2+t)+'"/>'
+  :'<line x1="'+f(x1-t)+'" y1="'+f(y1)+'" x2="'+f(x1+t)+'" y2="'+f(y1)+'"/><line x1="'+f(x2-t)+'" y1="'+f(y2)+'" x2="'+f(x2+t)+'" y2="'+f(y2)+'"/>';
+ const cx=f((x1+x2)/2),cy=f((y1+y2)/2),w=txt.length*9+14;
+ return s+'</g><rect x="'+(cx-w/2)+'" y="'+(cy-12)+'" width="'+w+'" height="24" rx="7" fill="#fff"/><text x="'+cx+'" y="'+(cy+5)+'" text-anchor="middle" font-size="14" font-weight="900" fill="'+c+'">'+txt+'</text>'}
+function ruler(x,y,len,hz,c,s){const f=v=>v*S.sc;let o='<g stroke="'+c+'" stroke-width="1.5" fill="'+c+'" font-size="11" font-weight="700">';
+ for(let i=0;i<=len*2;i++){const p=i/2,tl=i%2?.15:.3;
+  if(hz){o+='<line x1="'+f(x+p)+'" y1="'+f(y)+'" x2="'+f(x+p)+'" y2="'+f(y+s*tl)+'"/>';if(!(i%2))o+='<text stroke="none" x="'+f(x+p)+'" y="'+(f(y+s*.5)+(s>0?4:0))+'" text-anchor="middle">'+p+'</text>'}
+  else{o+='<line x1="'+f(x)+'" y1="'+f(y+p)+'" x2="'+f(x+s*tl)+'" y2="'+f(y+p)+'"/>';if(!(i%2))o+='<text stroke="none" x="'+f(x+s*.4)+'" y="'+(f(y+p)+4)+'" text-anchor="'+(s>0?'start':'end')+'">'+p+'</text>'}}
+ return o+'</g>'}
+const GR='#0a8f3f',RD='#d11';
+const rotC=p=>({x:p.x+p.w/2,y:p.y+p.h+.5});
+function draw(){
+  S.cutBtn=null;
+  if(S.step===1){check();return}
+  if(S.fin){renderFinal();return}
+  const l=S.l,a=S.a,s2=S.step===2,sw=OX+Math.max(l,LL())+.6,sc=S.sc=Math.min(70,780/sw),f=v=>v*sc;
+  S.W=sw*sc;S.H=(s2?TY+2+1.9:RY+a+1.2)*sc;
+  let h='<defs><clipPath id="rc"><rect x="'+f(OX)+'" y="'+f(RY)+'" width="'+f(l)+'" height="'+f(a)+'"/></clipPath>'
+  +'<linearGradient id="wd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6a66f"/><stop offset="1" stop-color="#b98550"/></linearGradient>'
+  +'<linearGradient id="cy" x1="0" x2="1"><stop offset="0" stop-color="#6e4222"/><stop offset=".45" stop-color="#e2b685"/><stop offset="1" stop-color="#7a4b25"/></linearGradient>'
+  +'<pattern id="gh" width="20" height="'+sc/4+'" patternUnits="userSpaceOnUse"><line x1="0" y1="1" x2="20" y2="1" stroke="#6b3f1c" stroke-opacity=".4" stroke-width="1.3"/></pattern>'
+  +'<pattern id="gv" width="'+sc/4+'" height="20" patternUnits="userSpaceOnUse"><line x1="1" y1="0" x2="1" y2="20" stroke="#6b3f1c" stroke-opacity=".4" stroke-width="1.3"/></pattern>'
+  +'<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="3" dy="5" stdDeviation="4" flood-opacity=".35"/></filter></defs>';
+  const tx=(x,y,t,c)=>'<text x="'+f(x)+'" y="'+f(y)+'" font-size="13" font-weight="800" fill="'+c+'">'+t+'</text>';
+  const scis=(x,y)=>'<text x="'+f(x)+'" y="'+f(y)+'" font-size="24" style="pointer-events:none">✂️</text>';
+  if(s2){
+    h+=tx(OX,.7,'ROLLO · 2 M de ancho','#d35400');
+    h+='<rect x="'+f(OX-.9)+'" y="'+f(TY)+'" width="'+f(.9)+'" height="'+f(2)+'" rx="'+f(.1)+'" fill="url(#cy)" stroke="#4a2c12"/>';
+    if(S.A>0)h+=wood(OX,TY,S.A,2,'h',S.done?'✔ Despachado':'',false,false)+ruler(OX,TY,S.A,true,'#fff',1)+dim(OX,TY+2.5,OX+S.A,TY+2.5,fmt(S.A)+' M',GR)+dim(OX+S.A+.5,TY,OX+S.A+.5,TY+2,'2 M',RD);
+    h+='<line x1="'+f(OX+LL())+'" y1="'+f(TY-.25)+'" x2="'+f(OX+LL())+'" y2="'+f(TY+2.25)+'" stroke="'+GR+'" stroke-width="3" stroke-dasharray="3 4"/>'+tx(OX+LL()-1.6,TY-.35,'TOPE '+fmt(LL())+' M',GR);
+    if(!S.done){
+      const atEnd=S.A>0&&Math.abs(S.A-LL())<1e-9;
+      if(atEnd){
+        h+='<line x1="'+f(OX)+'" y1="'+f(TY-.15)+'" x2="'+f(OX)+'" y2="'+f(TY+2.15)+'" stroke="#d00" stroke-width="3" stroke-dasharray="7 5"/>'+scis(OX-.4,TY-.2);
+        const bw=Math.min(300,S.W-12),bh=64,cx=Math.max(bw/2+6,Math.min(f(OX+LL()/2),S.W-bw/2-6)),cy=f(TY+1);
+        S.cutBtn={x:cx-bw/2,y:cy-bh/2,w:bw,h:bh};
+        h+='<g class="pulse" style="pointer-events:none"><rect x="'+(cx-bw/2)+'" y="'+(cy-bh/2)+'" width="'+bw+'" height="'+bh+'" rx="32" fill="#d00" stroke="#fff" stroke-width="4"/><text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-size="28" font-weight="900" fill="#fff">✂️ Toca para cortar</text></g>';
+      }
+      h+='<circle cx="'+f(OX+S.A)+'" cy="'+f(TY+1)+'" r="'+f(.27)+'" fill="#0076a3" stroke="#fff" stroke-width="3"/><text x="'+f(OX+S.A)+'" y="'+(f(TY+1)+5)+'" text-anchor="middle" font-size="15" fill="#fff" font-weight="900">↔</text>';
+    }
+  }else{
+    h+=tx(OX,.7,'PIEZAS','#d35400')+tx(OX,RY-.7,'CUARTO','#0076a3');
+    h+='<rect x="'+f(OX)+'" y="'+f(RY)+'" width="'+f(l)+'" height="'+f(a)+'" fill="#d9dde0"/>';
+    for(let i=1;i<l;i++)h+='<line x1="'+f(OX+i)+'" y1="'+f(RY)+'" x2="'+f(OX+i)+'" y2="'+f(RY+a)+'" stroke="#c3c9cc"/>';
+    for(let j=1;j<a;j++)h+='<line x1="'+f(OX)+'" y1="'+f(RY+j)+'" x2="'+f(OX+l)+'" y2="'+f(RY+j)+'" stroke="#c3c9cc"/>';
+    h+='<rect x="'+f(OX-.1)+'" y="'+f(RY-.1)+'" width="'+f(l+.2)+'" height="'+f(a+.2)+'" fill="none" stroke="#4a545c" stroke-width="'+f(.2)+'"/>';
+    h+=ruler(OX,RY-.12,l,true,'#555',-1)+ruler(OX-.12,RY,a,false,'#555',-1);
+    h+=dim(OX,RY+a+.5,OX+l,RY+a+.5,fmt(l)+' M',GR)+dim(OX-1,RY,OX-1,RY+a,fmt(a)+' M',RD);
+    const op=S.fin?null:S.plan[S.k],act=op?S.P.find(q=>q.id===op.id):null;
+    if(op&&op.t==='put'&&!S.opDone){const near=S.drag&&Math.hypot(act.x+act.w/2-(OX+op.x+act.w/2),act.y+act.h/2-(RY+op.y+act.h/2))<1.3;
+      h+='<rect x="'+f(OX+op.x)+'" y="'+f(RY+op.y)+'" width="'+f(act.w)+'" height="'+f(act.h)+'" fill="'+(near?'rgba(10,143,63,.45)':'rgba(10,143,63,.15)')+'" stroke="'+GR+'" stroke-width="3" stroke-dasharray="8 5"/>'}
+    S.P.filter(p=>p!==act).forEach(p=>{h+=wood(p.x,p.y,p.w,p.h,p.g,ltr(p.id)+' '+fmt(p.w)+'×'+fmt(p.h),false,false,!p.locked)});
+    if(act){h+=wood(act.x,act.y,act.w,act.h,act.g,ltr(act.id)+' '+fmt(act.w)+'×'+fmt(act.h),S.drag,true,false);
+      if(!act.locked){h+=ruler(act.x,act.y,act.w,true,'#fff',1)+ruler(act.x,act.y,act.h,false,'#fff',1)}
+      if(op.t==='cut'&&!S.opDone){
+        if(op.ax==='v')h+=dim(act.x,act.y+act.h+.45,act.x+op.at,act.y+act.h+.45,fmt(op.at)+' M',GR)+'<line x1="'+f(act.x+op.at)+'" y1="'+f(act.y-.15)+'" x2="'+f(act.x+op.at)+'" y2="'+f(act.y+act.h+.15)+'" stroke="#d00" stroke-width="3.5" stroke-dasharray="7 5"/>'+scis(act.x+op.at-.2,act.y-.2);
+        else h+=dim(act.x-.45,act.y,act.x-.45,act.y+op.at,fmt(op.at)+' M',RD)+'<line x1="'+f(act.x-.15)+'" y1="'+f(act.y+op.at)+'" x2="'+f(act.x+act.w+.15)+'" y2="'+f(act.y+op.at)+'" stroke="#d00" stroke-width="3.5" stroke-dasharray="7 5"/>'+scis(act.x+act.w,act.y+op.at+.2);
+      }
+      if(op.t==='rot'&&!S.opDone){const c=rotC(act);h+='<circle cx="'+f(c.x)+'" cy="'+f(c.y)+'" r="'+f(.35)+'" fill="#f07f0a" stroke="#fff" stroke-width="3"/><text x="'+f(c.x)+'" y="'+(f(c.y)+8)+'" text-anchor="middle" font-size="24" fill="#fff" font-weight="900" style="pointer-events:none">⟳</text>'}
+      const m=S.hover;
+      if(m&&op.t==='put'&&!S.opDone&&(S.drag||(m.x>=act.x&&m.x<=act.x+act.w&&m.y>=act.y&&m.y<=act.y+act.h)))h+='<text x="'+f(m.x-.25)+'" y="'+f(m.y+.35)+'" font-size="'+f(.8)+'" style="pointer-events:none">'+(S.drag?'✊':'✋')+'</text>';
+    }
+  }
+  const sv=$('svg2');sv.setAttribute('viewBox','0 0 '+S.W+' '+S.H);sv.innerHTML=h;check();
+}
+function check(){
+  const el=$('s-status');el.className='status';let t='';
+  if(S.step===1){t=S.msg;if(!t){el.style.display='none';return}el.classList.add('bad')}
+  else if(S.step===2){t=S.done?'✔ Despachado '+fmt(LL())+' M × 2 M = '+S.billed+' m². Pulsa Siguiente':'Desenrollado '+fmt(S.A)+' M de '+fmt(LL())+' M';if(S.done)el.classList.add('ok');else if(S.msg)t+=' · ✘ '+S.msg}
+  else if(S.fin){t='Sobran '+fmt(S.billed-S.l*S.a)+' m² de retazos';el.classList.add('ok')}
+  else if(S.msg){t=S.msg;el.classList.add('bad')}
+  else{el.style.display='none';return}
+  el.style.display='';el.textContent=t;
+}
+function pt(e){const r=$('svg2').getBoundingClientRect(),k=S.W/r.width;return{x:(e.clientX-r.left)*k/S.sc,y:(e.clientY-r.top)*k/S.sc}}
+(function(){const s=$('svg2');
+ s.addEventListener('pointerdown',e=>{
+  if(S.step<2)return;const m=pt(e);S.hover=m;S.msg='';
+  if(S.step===2){
+   if(!S.done){
+    const cb=S.cutBtn;
+    if(cb&&m.x*S.sc>=cb.x&&m.x*S.sc<=cb.x+cb.w&&m.y*S.sc>=cb.y&&m.y*S.sc<=cb.y+cb.h){cutRoll();return}
+    if(Math.hypot(m.x-(OX+S.A),m.y-(TY+1))<.45){S.drag={k:'roll'};s.setPointerCapture(e.pointerId)}
+   }
+   draw();return;
+  }
+  if(!S.fin&&!S.opDone){
+   const op=S.plan[S.k],p=S.P.find(q=>q.id===op.id);
+   if(op.t==='cut'){const hit=op.ax==='v'?Math.abs(m.x-(p.x+op.at))<.35&&m.y>p.y-.3&&m.y<p.y+p.h+.3:Math.abs(m.y-(p.y+op.at))<.35&&m.x>p.x-.3&&m.x<p.x+p.w+.3;if(hit){doOp();return}}
+   else if(op.t==='rot'){const c=rotC(p);if(Math.hypot(m.x-c.x,m.y-c.y)<.45){doOp();return}}
+   else if(m.x>=p.x&&m.x<=p.x+p.w&&m.y>=p.y&&m.y<=p.y+p.h){S.drag={k:'p',p,dx:m.x-p.x,dy:m.y-p.y};s.setPointerCapture(e.pointerId)}
+  }
+  draw();
+ });
+ s.addEventListener('pointermove',e=>{
+  if(S.step<2)return;const m=pt(e);S.hover=m;const d=S.drag;
+  if(d&&d.k==='roll')S.A=Math.max(0,Math.min(snap5(m.x-OX),LL()));
+  else if(d&&d.k==='p'){d.p.x=m.x-d.dx;d.p.y=m.y-d.dy}
+  draw();
+ });
+ s.addEventListener('pointerup',()=>{const d=S.drag;if(!d)return;S.drag=null;
+  if(d.k==='p'){const p=d.p,op=S.plan[S.k];
+   if(Math.hypot(p.x-(OX+op.x),p.y-(RY+op.y))<1.3){apply(op);finishOp();return}
+   p.x=Math.max(0,Math.min(p.x,S.W/S.sc-p.w));p.y=Math.max(0,Math.min(p.y,S.H/S.sc-p.h));S.msg='Acércala al lugar marcado';
+  }
+  draw()});
+ s.addEventListener('pointerleave',()=>{if(!S.drag&&S.step>1){S.hover=null;draw()}});
+})();
+
+function togglePlay(){S.play=!S.play;if(S.raf)cancelAnimationFrame(S.raf);S.fp=[];if(S.play)S.raf=requestAnimationFrame(loop);refresh()}
+function loop(ts){if(!S.play||!S.fin||S.step!==3)return;S.t=ts/1000;renderFinal();S.raf=requestAnimationFrame(loop)}
+function renderFinal(){
+  const l=S.l,a=S.a,sc=S.sc=Math.min(90,760/(l+1.4)),f=v=>v*sc,X=.7,Y=.7,t=S.t||0;
+  S.W=(l+1.4)*sc;S.H=(a+1.4)*sc;
+  let h='<defs><clipPath id="rf"><rect x="'+f(X)+'" y="'+f(Y)+'" width="'+f(l)+'" height="'+f(a)+'"/></clipPath>'
+  +'<linearGradient id="wd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6a66f"/><stop offset="1" stop-color="#b98550"/></linearGradient>'
+  +'<linearGradient id="shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'
+  +'<pattern id="gh" width="20" height="'+sc/4+'" patternUnits="userSpaceOnUse"><line x1="0" y1="1" x2="20" y2="1" stroke="#6b3f1c" stroke-opacity=".4" stroke-width="1.3"/></pattern>'
+  +'<pattern id="gv" width="'+sc/4+'" height="20" patternUnits="userSpaceOnUse"><line x1="1" y1="0" x2="1" y2="20" stroke="#6b3f1c" stroke-opacity=".4" stroke-width="1.3"/></pattern>'
+  +'<filter id="sh2" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity=".4"/></filter></defs>';
+  h+='<rect x="'+f(X-.1)+'" y="'+f(Y-.1)+'" width="'+f(l+.2)+'" height="'+f(a+.2)+'" fill="#4a545c"/>';
+  S.P.filter(p=>p.locked).forEach(p=>{h+=wood(p.x-OX+X,p.y-RY+Y,p.w,p.h,p.g,'',false,false,false)});
+  if(S.play){
+    const x0=.75,x1=Math.max(l-.75,x0+.1),y0=.75,y1=Math.max(a-.75,y0+.1),w=x1-x0,hh=y1-y0;
+    const r=Math.max(.05,Math.min(.7,w/2,hh/2)),sw1=w-2*r,sh1=hh-2*r,arc=Math.PI*r/2,P=2*(sw1+sh1)+4*arc;
+    let seg=(t*.9)%P,px,py,ang,i=0;const Ls=[sw1,arc,sh1,arc,sw1,arc,sh1,arc];
+    while(i<7&&seg>=Ls[i]){seg-=Ls[i];i++}
+    const ap=(cx,cy,t0)=>{const dg=t0+(seg/arc)*90,th=dg*Math.PI/180;px=cx+r*Math.cos(th);py=cy+r*Math.sin(th);ang=dg+90};
+    switch(i){
+      case 0:px=x0+r+seg;py=y0;ang=0;break;
+      case 1:ap(x1-r,y0+r,-90);break;
+      case 2:px=x1;py=y0+r+seg;ang=90;break;
+      case 3:ap(x1-r,y1-r,0);break;
+      case 4:px=x1-r-seg;py=y1;ang=180;break;
+      case 5:ap(x0+r,y1-r,90);break;
+      case 6:px=x0;py=y1-r-seg;ang=270;break;
+      default:ap(x0+r,y0+r,180)}
+    S.fp=S.fp||[];const lf=S.fp[S.fp.length-1];
+    if(!lf||Math.hypot(px-lf.x,py-lf.y)>.5){S.fp.push({x:px,y:py,a:ang});if(S.fp.length>10)S.fp.shift()}
+    S.fp.forEach((q,i)=>{const rr=q.a*Math.PI/180,sd=i%2?1:-1;
+      h+='<ellipse cx="'+f(X+q.x-Math.sin(rr)*.12*sd)+'" cy="'+f(Y+q.y+Math.cos(rr)*.12*sd)+'" rx="'+f(.1)+'" ry="'+f(.05)+'" transform="rotate('+q.a+' '+f(X+q.x-Math.sin(rr)*.12*sd)+' '+f(Y+q.y+Math.cos(rr)*.12*sd)+')" fill="#3b2a1e" opacity="'+((i+1)/(S.fp.length*3)).toFixed(2)+'"/>'});
+    const sx=((t*.35)%1.5-.25)*l;
+    h+='<g clip-path="url(#rf)"><rect x="'+f(X+sx)+'" y="'+f(Y)+'" width="'+f(l*.3)+'" height="'+f(a)+'" fill="url(#shine)"/></g>';
+    /* Persona vista desde arriba: camina hacia +x (el giro lo da rotate(ang)) */
+    const k=Math.sin(t*6),g=v=>f(v*1.25),sh='#2b7bd1',sk='#f1c9a5';
+    h+='<g transform="translate('+f(X+px)+' '+f(Y+py)+') rotate('+ang.toFixed(1)+')">'
+     +'<ellipse cx="'+g(.03)+'" cy="'+g(.05)+'" rx="'+g(.27)+'" ry="'+g(.28)+'" fill="#000" opacity=".13"/>'
+     +'<g stroke="#2f3e55" stroke-width="'+g(.13)+'" stroke-linecap="round"><line x1="0" y1="'+g(-.1)+'" x2="'+g(.2*k)+'" y2="'+g(-.11)+'"/><line x1="0" y1="'+g(.1)+'" x2="'+g(-.2*k)+'" y2="'+g(.11)+'"/></g>'
+     +'<ellipse cx="'+g(.25*k)+'" cy="'+g(-.11)+'" rx="'+g(.13)+'" ry="'+g(.065)+'" fill="#1d252e"/><ellipse cx="'+g(-.25*k)+'" cy="'+g(.11)+'" rx="'+g(.13)+'" ry="'+g(.065)+'" fill="#1d252e"/>'
+     +'<g stroke="'+sh+'" stroke-width="'+g(.1)+'" stroke-linecap="round"><line x1="0" y1="'+g(-.21)+'" x2="'+g(-.2*k)+'" y2="'+g(-.3)+'"/><line x1="0" y1="'+g(.21)+'" x2="'+g(.2*k)+'" y2="'+g(.3)+'"/></g>'
+     +'<circle cx="'+g(-.22*k)+'" cy="'+g(-.33)+'" r="'+g(.05)+'" fill="'+sk+'"/><circle cx="'+g(.22*k)+'" cy="'+g(.33)+'" r="'+g(.05)+'" fill="'+sk+'"/>'
+     +'<g transform="rotate('+(k*4).toFixed(1)+')">'
+     +'<ellipse cx="0" cy="0" rx="'+g(.12)+'" ry="'+g(.25)+'" fill="'+sh+'" stroke="#1a5a99" stroke-width="1.5"/>'
+     +'<ellipse cx="'+g(.02)+'" cy="0" rx="'+g(.06)+'" ry="'+g(.15)+'" fill="#5aa2e8" opacity=".55"/>'
+     +'<ellipse cx="'+g(.02)+'" cy="0" rx="'+g(.1)+'" ry="'+g(.105)+'" fill="'+sk+'"/>'
+     +'<ellipse cx="0" cy="'+g(-.105)+'" rx="'+g(.025)+'" ry="'+g(.035)+'" fill="#e0ae88"/><ellipse cx="0" cy="'+g(.105)+'" rx="'+g(.025)+'" ry="'+g(.035)+'" fill="#e0ae88"/>'
+     +'<ellipse cx="'+g(.125)+'" cy="0" rx="'+g(.02)+'" ry="'+g(.016)+'" fill="#e0ae88"/>'
+     +'<ellipse cx="'+g(-.02)+'" cy="0" rx="'+g(.095)+'" ry="'+g(.1)+'" fill="#2a1b12"/>'
+     +'</g></g>';
+  }
+  const sv=$('svg2');sv.setAttribute('viewBox','0 0 '+S.W+' '+S.H);sv.innerHTML=h;check();
+}
+simReset();updVetaNums();
+</script>
+</body>
+</html>
