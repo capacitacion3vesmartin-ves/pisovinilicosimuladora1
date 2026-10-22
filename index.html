@@ -132,6 +132,15 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
 .sm-nav{display:flex;gap:8px}
 .bigflow{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 6px;font-size:34px;font-weight:900;color:#555}
 .bigflow .ok{color:#006600}.bigflow .ar{color:#f07f0a}
+/* v10 */
+.rowhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rnd{display:flex;gap:6px}
+.rnd .btn-toggle{flex:none;padding:5px 10px;font-size:11px}
+.input-number-wrapper.err{border-color:#b00020;background:#fdeaea}
+.input-number-wrapper.err input{background:#fdeaea}
+.rm-box{max-width:420px;align-items:stretch}
+.rm-icon{font-size:42px;text-align:center;line-height:1}
+.rm-msg{font-size:15px;color:#222;text-align:center;line-height:1.45}
 </style>
 </head>
 <body>
@@ -150,16 +159,16 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
   <div id="tab-calc" style="display:flex;flex-direction:column;gap:15px">
     <div class="field-group">
       <label class="field-label" for="ancho">Ancho del área *</label>
-      <div class="input-number-wrapper">
-        <input type="number" id="ancho" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()">
+      <div class="input-number-wrapper" id="w-ancho">
+        <input type="number" id="ancho" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()" onchange="validarRegla()">
         <button class="btn-step" onclick="adjustValue('ancho',-0.5)">−</button>
         <button class="btn-step" onclick="adjustValue('ancho',0.5)">+</button>
       </div>
     </div>
     <div class="field-group">
       <label class="field-label" for="largo">Largo del área *</label>
-      <div class="input-number-wrapper">
-        <input type="number" id="largo" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()">
+      <div class="input-number-wrapper" id="w-largo">
+        <input type="number" id="largo" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()" onchange="validarRegla()">
         <button class="btn-step" onclick="adjustValue('largo',-0.5)">−</button>
         <button class="btn-step" onclick="adjustValue('largo',0.5)">+</button>
       </div>
@@ -188,7 +197,7 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
     </div>
     <div class="section-title">Resultado:</div>
     <div class="results-container">
-      <div class="result-row"><span class="result-label">Vendes (m2)</span><input type="text" id="res-vendes" class="result-input" value="0" readonly></div>
+      <div class="result-row"><div class="rowhead"><span class="result-label">Vendes (m2)</span><div class="rnd"><button type="button" class="btn-toggle blue active" id="rnd-up" onclick="setRedondeo('up')">Redondear ↑ arriba</button><button type="button" class="btn-toggle blue" id="rnd-down" onclick="setRedondeo('down')">Redondear ↓ abajo</button><button type="button" class="btn-toggle blue" id="rnd-real" onclick="setRedondeo('real')">Ver real</button></div></div><input type="text" id="res-vendes" class="result-input" value="0" readonly></div>
       <div class="result-row"><span class="result-label">Le despachan al cliente:</span><input type="text" id="res-despachan" class="result-input" value="0 M lineales x 2 M (ancho de rollo)" readonly></div>
       <div class="result-row"><span class="result-label">Pegamento o cola vinílica</span><input type="text" id="res-pegamento" class="result-input" value="0 galones" readonly></div>
     </div>
@@ -214,10 +223,10 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
         <div class="vinfo" id="e-info" style="display:none"></div>
       </div>
       <div class="dims">
-        <div class="field-group"><label class="field-label">Ancho (m)</label><input type="number" id="s-a" value="3" min="1" max="20" step="0.5" oninput="simReset()" onchange="fixDims()"></div>
-        <div class="field-group"><label class="field-label">Largo (m)</label><input type="number" id="s-l" value="7" min="1" max="20" step="0.5" oninput="simReset()" onchange="fixDims()"></div>
+        <div class="field-group"><label class="field-label">Ancho (m)</label><input type="number" id="s-a" value="3" min="1" max="20" step="any" oninput="simReset()" onchange="fixDims()"></div>
+        <div class="field-group"><label class="field-label">Largo (m)</label><input type="number" id="s-l" value="7" min="1" max="20" step="any" oninput="simReset()" onchange="fixDims()"></div>
       </div>
-      <div class="hint">Medidas de 0.5 en 0.5 m · máximo 20 m</div>
+      <div class="hint">Puedes usar decimales (ej. 3.25 m) · máximo 20 m</div>
       <div class="formula" id="s-formula"></div>
       <button type="button" class="btn-toggle blue" id="s-expbtn" onclick="toggleExp()">Ver resultado y cómo se calcula</button>
       <div class="explain hidden" id="s-explain"></div>
@@ -234,6 +243,14 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
     <div class="status" id="s-status"></div>
   </div>
 
+</div>
+<div class="modal hidden" id="rm" onclick="if(event.target===this)cerrarRegla()">
+  <div class="modal-box rm-box">
+    <div class="rm-icon">⚠️</div>
+    <div class="mtitle">Revisa las medidas</div>
+    <div class="rm-msg">Recuerda que el <b>ancho</b> siempre debe ser la medida más corta. Intercambia los valores: el largo debe ser mayor o igual al ancho.</div>
+    <button type="button" class="btn-toggle active" onclick="cerrarRegla()">Entendido</button>
+  </div>
 </div>
 <div class="modal hidden" id="vm" onclick="if(event.target===this)vetaCancel()">
   <div class="modal-box">
@@ -273,7 +290,22 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
 <script>
 /* ---------- Calculadora (original) ---------- */
 let priorizarEstetica="No",direccionVeta="En dirección al largo";
-function adjustValue(id,a){const i=document.getElementById(id);let v=parseFloat(i.value)||0;v=Math.max(0,v+a);i.value=v>0?v.toFixed(2):'';calcular()}
+const r6=x=>Math.round(x*1e6)/1e6,cl=x=>Math.ceil(r6(x)),fl=x=>Math.floor(r6(x));
+let redondeo="up";
+function setRedondeo(v){redondeo=v;
+  document.getElementById('rnd-up').classList.toggle('active',v==='up');
+  document.getElementById('rnd-down').classList.toggle('active',v==='down');
+  document.getElementById('rnd-real').classList.toggle('active',v==='real');calcular()}
+function reglaInvalida(){
+  const a=parseFloat(document.getElementById('ancho').value)||0,l=parseFloat(document.getElementById('largo').value)||0;
+  return a>0&&l>0&&a>l;
+}
+function marcarRegla(){const bad=reglaInvalida();
+  document.getElementById('w-ancho').classList.toggle('err',bad);
+  document.getElementById('w-largo').classList.toggle('err',bad);return bad}
+function validarRegla(){if(marcarRegla())document.getElementById('rm').classList.remove('hidden');calcular()}
+function cerrarRegla(){document.getElementById('rm').classList.add('hidden')}
+function adjustValue(id,a){const i=document.getElementById(id);let v=parseFloat(i.value)||0;v=Math.max(0,v+a);i.value=v>0?v.toFixed(2):'';validarRegla()}
 function setPriorizarEstetica(v){priorizarEstetica=v;
   document.getElementById('btn-estetica-yes').classList.toggle('active',v==='Yes');
   document.getElementById('btn-estetica-no').classList.toggle('active',v!=='Yes');
@@ -291,14 +323,15 @@ function updVetaNums(){
 function calcular(){
   updVetaNums();
   const largo=parseFloat(document.getElementById('largo').value)||0,ancho=parseFloat(document.getElementById('ancho').value)||0;
-  if(largo<=0||ancho<=0){document.getElementById('res-vendes').value="0";document.getElementById('res-despachan').value="0 M lineales x 2 M (ancho de rollo)";document.getElementById('res-pegamento').value="0 galones";return}
+  if(marcarRegla()||largo<=0||ancho<=0){document.getElementById('res-vendes').value="0";document.getElementById('res-despachan').value="0 M lineales x 2 M (ancho de rollo)";document.getElementById('res-pegamento').value="0 galones";return}
   let m2;
-  if(priorizarEstetica==="No")m2=Math.ceil(largo*ancho);
-  else if(direccionVeta==="En dirección al largo")m2=Math.ceil(ancho/2)*largo*2;
-  else m2=Math.ceil(largo/2)*ancho*2;
+  const rd=redondeo==='up'?cl:redondeo==='down'?fl:(x=>Math.round(x*100)/100);
+  if(priorizarEstetica==="No")m2=rd(largo*ancho);
+  else if(direccionVeta==="En dirección al largo")m2=rd(cl(ancho/2)*largo*2);
+  else m2=rd(cl(largo/2)*ancho*2);
   document.getElementById('res-vendes').value=m2;
-  document.getElementById('res-despachan').value=(m2/2)+" M lineales x 2 M (ancho de rollo)";
-  document.getElementById('res-pegamento').value=Math.ceil(largo*ancho/13)+" galones";
+  document.getElementById('res-despachan').value=(Math.round(m2/2*100)/100)+" M lineales x 2 M (ancho de rollo)";
+  document.getElementById('res-pegamento').value=cl(largo*ancho/13)+" galones";
 }
 
 /* ---------- Pestañas ---------- */
@@ -314,9 +347,9 @@ function showTab(t){
 /* ---------- Simulador por pasos ---------- */
 const S={a:3,l:7,mode:'area',step:1,billed:0,P:[],A:0,done:false,plan:[],k:0,opDone:false,fin:false,drag:null,hover:null,msg:'',sc:40,W:0,H:0,nid:0,exp:false,fx:false,cutBtn:null};
 const TY=1.2,OX=2.1,RY=TY+3.6,$=id=>document.getElementById(id);
-const fmt=n=>(Math.round(n*100)/100).toString(),snap5=v=>Math.round(v*2)/2,LL=()=>S.billed/2;
+const fmt=n=>(Math.round(n*100)/100).toString(),snap5=v=>Math.round(v*100)/100,r2=v=>Math.round(v*100)/100,sn5=v=>Math.round(v*2)/2,LL=()=>S.billed/2;
 const NAMES={area:'Por área',largo:'Estética · veta al largo',ancho:'Estética · veta al ancho'};
-function m2(){const{a,l,mode}=S;return mode==='area'?Math.ceil(a*l):mode==='largo'?Math.ceil(a/2)*l*2:Math.ceil(l/2)*a*2}
+function m2(){const{a,l,mode}=S,c=x=>Math.ceil(Math.round(x*1e6)/1e6);return mode==='area'?c(a*l):mode==='largo'?c(c(a/2)*l*2):c(c(l/2)*a*2)}
 const FORM={
  area:["m² = ancho × largo (redondeado hacia arriba)","Sin importar las vetas ni cuántas piezas queden."],
  largo:["m² = (ancho ÷ 2, redondeado hacia arriba) × largo × 2","Vetas en el sentido del largo. <b>Se compra más m².</b>"],
@@ -325,32 +358,44 @@ const FORM={
 function buildPlan(mode,l,a,L0){
   const V=[{id:0,w:L0,h:2}];let nid=1,bad=false;const ops=[],E=1e-9,get=id=>V.find(p=>p.id===id);
   const cut=(id,ax,at)=>{const p=get(id);at=snap5(at);
-    if(ax==='v'){if(at<=0||at>=p.w)bad=true;V.push({id:nid,w:p.w-at,h:p.h});p.w=at}
-    else{if(at<=0||at>=p.h)bad=true;V.push({id:nid,w:p.w,h:p.h-at});p.h=at}
+    if(ax==='v'){if(at<=0||at>=p.w)bad=true;V.push({id:nid,w:r2(p.w-at),h:p.h});p.w=at}
+    else{if(at<=0||at>=p.h)bad=true;V.push({id:nid,w:p.w,h:r2(p.h-at)});p.h=at}
     ops.push({t:'cut',id,ax,at});return nid++};
   const rot=id=>{const p=get(id),t=p.w;p.w=p.h;p.h=t;ops.push({t:'rot',id})};
-  const put=(id,x,y)=>ops.push({t:'put',id,x,y});
+  const placed=new Set(),put=(id,x,y)=>{placed.add(id);ops.push({t:'put',id,x,y})};
   let cur=0;
-  if(mode==='largo'){const n=Math.ceil(a/2);
-    for(let k=0;k<n;k++){const rh=Math.min(2,a-2*k),row=cur;if(k<n-1)cur=cut(cur,'v',l);if(rh<2)cut(row,'h',rh);put(row,0,2*k)}}
-  else if(mode==='ancho'){const n=Math.ceil(l/2);
-    for(let k=0;k<n;k++){const cw=Math.min(2,l-2*k),col=cur;if(k<n-1)cur=cut(cur,'v',a);if(cw<2)cut(col,'h',cw);rot(col);put(col,2*k,0)}}
-  else{const nf=Math.floor(a/2),r=a-2*nf;
+  if(mode==='largo'){const n=Math.ceil(r2(a/2));
+    for(let k=0;k<n;k++){const rh=r2(Math.min(2,a-2*k)),row=cur;if(k<n-1)cur=cut(cur,'v',l);if(rh<2)cut(row,'h',rh);put(row,0,2*k)}}
+  else if(mode==='ancho'){const n=Math.ceil(r2(l/2));
+    for(let k=0;k<n;k++){const cw=r2(Math.min(2,l-2*k)),col=cur;if(k<n-1)cur=cut(cur,'v',a);if(cw<2)cut(col,'h',cw);rot(col);put(col,2*k,0)}}
+  else{const nf=Math.floor(r2(a/2)),r=r2(a-2*nf);
     for(let k=0;k<nf;k++){const row=cur;if(get(cur).w>l+E)cur=cut(cur,'v',l);put(row,0,2*k)}
-    if(r>E){let need=l,x=0,sub=cur;
-      while(need>E){if(sub==null||get(sub).h<r-E){bad=true;break}
-        let nxt=null;if(get(sub).h>r+E)nxt=cut(sub,'h',r);
-        if(get(sub).w>need+E)cut(sub,'v',need);
-        put(sub,x,2*nf);x+=get(sub).w;need-=get(sub).w;sub=nxt}}}
+    if(r>E){let need=l,x=0,sub=cur,guard=0;
+      while(need>E&&guard++<60){
+        let p=sub!=null?get(sub):null;
+        if(!p||placed.has(p.id)||Math.max(p.w,p.h)<r-E){
+          const un=V.filter(q=>!placed.has(q.id)&&Math.max(q.w,q.h)>=r-E).sort((m,n)=>n.w*n.h-m.w*m.h)[0];
+          if(!un){bad=true;break}
+          sub=un.id;p=un}
+        let nxt=null;
+        if(p.h<r-E){ /* retazo largo y delgado: se corta un tramo del largo que falta y se gira */
+          if(p.w>r+E)nxt=cut(sub,'v',r);
+          rot(sub)}
+        else if(p.h>r+E)nxt=cut(sub,'h',r);
+        p=get(sub);
+        if(p.w>need+E)cut(sub,'v',need);
+        put(sub,x,2*nf);x=r2(x+get(sub).w);need=r2(need-get(sub).w);sub=nxt}
+      if(need>E)bad=true}}
   return bad?null:ops;
 }
 function apply(op){const p=S.P.find(q=>q.id===op.id);
-  if(op.t==='cut'){if(op.ax==='v'){S.P.push({...p,id:S.nid++,x:p.x+op.at,w:p.w-op.at});p.w=op.at}else{S.P.push({...p,id:S.nid++,y:p.y+op.at,h:p.h-op.at});p.h=op.at}}
+  if(op.t==='cut'){if(op.ax==='v'){S.P.push({...p,id:S.nid++,x:r2(p.x+op.at),w:r2(p.w-op.at)});p.w=op.at}else{S.P.push({...p,id:S.nid++,y:r2(p.y+op.at),h:r2(p.h-op.at)});p.h=op.at}}
   else if(op.t==='rot'){const t=p.w;p.w=p.h;p.h=t;p.g=p.g==='h'?'v':'h';p.y=TY}
+  else if(op.t==='fill'){p.w=op.w;p.h=op.h}
   else{p.x=OX+op.x;p.y=RY+op.y;p.locked=true}
 }
 function setMode(m){S.mode=m;simReset()}
-const sn=v=>Math.round(v*2)/2;
+const sn=v=>Math.round(v*100)/100;
 function fixDims(){$('s-a').value=S.a;$('s-l').value=S.l}
 function simEstetica(yes){if(yes)openVeta();else{if(S.mode!=='area')setMode('area');else refresh()}}
 function openVeta(){
@@ -495,7 +540,7 @@ function stepsData(){
 }
 function explain(){
   const a=S.a,l=S.l,q=m2(),mode=S.mode,D=stepsData();let note='',pv='';
-  if(mode==='area'){if(!buildPlan('area',l,a,q/2))note='⚠ Con estas medidas no se puede armar por área sin juntar retazos. Conviene priorizar estética (Sí).'}
+  if(mode==='area'){{const pl=buildPlan('area',l,a,q/2);if(!pl)note='⚠ Con estas medidas no alcanza el material para armar por área. Conviene priorizar estética (Sí).';else if(pl.some(o=>o.t==='rot'))note='Con estas medidas hay que girar y unir retazos para completar el último pedazo. Por área no importa cómo queden; con estética (Sí) las vetas quedan mejor.'}}
   else{
     const area=Math.ceil(a*l),sob=q-a*l;
     note='El cuarto tiene '+fmt(a*l)+' m², <mark class="hl">pero se compran '+q+' m²</mark>: sobran '+fmt(sob)+' m² de retazos. Por área serían '+area+' m² ('+(q-area)+' m² menos), pero habría que unir retazos y el acabado no sería tan uniforme.';
@@ -541,8 +586,8 @@ function peso(){$('s-peso').textContent=fmt((parseFloat($('s-q').value)||0)*.59)
 function facturar(){
   const q=parseFloat($('s-q').value);S.bad=true;
   if(!(q>0))S.msg='Escribe la cantidad en m²';
-  else if(S.mode==='area'&&!buildPlan('area',S.l,S.a,Math.ceil(S.a*S.l)/2))S.msg='Con estas medidas no se puede armar por área: prioriza estética (Sí)';
-  else if(Math.abs(q-m2())>1e-9)S.msg='✘ La cantidad no coincide con el cálculo.'+hintMal(q);
+  else if(S.mode==='area'&&!buildPlan('area',S.l,S.a,Math.ceil(Math.round(S.a*S.l*1e6)/1e6)/2))S.msg='Con estas medidas no alcanza el material por área: prioriza estética (Sí)';
+  else if(Math.abs(q-m2())>0.005)S.msg='✘ La cantidad no coincide con el cálculo.'+hintMal(q);
   else{resetInstall();S.billed=q;S.step=2;S.A=0;S.done=false;S.msg='';S.bad=false;S.exp=false}
   refresh();
 }
@@ -575,7 +620,8 @@ function refresh(){
     const op=S.plan[S.k],L=ltr(op.id);
     let t,btn='';
     if(op.t==='cut'){t='Corta la pieza <b>'+L+'</b> a <b>'+fmt(op.at)+' M</b> '+(op.ax==='v'?'desde su borde izquierdo':'desde su borde de arriba');btn=b(' blue','✂️ Cortar','doOp()',S.opDone)}
-    else if(op.t==='rot'){t='Gira la pieza <b>'+L+'</b> para que las vetas queden bien';btn=b(' blue','⟳ Girar','doOp()',S.opDone)}
+    else if(op.t==='rot'){t=S.mode==='area'?'Gira el retazo <b>'+L+'</b> para que encaje en el hueco (por área la veta no importa)':'Gira la pieza <b>'+L+'</b> para que las vetas queden bien';btn=b(' blue','⟳ Girar','doOp()',S.opDone)}
+    else if(op.t==='fill'){t='Con el retazo <b>'+L+'</b> arma el pedazo que falta de <b>'+fmt(op.w)+' × '+fmt(op.h)+' M</b> (se une con los otros retazos)';btn=b(' blue','✂️ Cortar retazo','doOp()',S.opDone)}
     else t='✋ Arrastra la pieza <b>'+L+'</b> al lugar marcado';
     $('s-say').className='say'+(S.fin||S.opDone?' okk':'');
     $('s-say').innerHTML=S.fin?'✔ <b>¡Instalaste todo el piso!</b> Mira cómo quedó el cuarto.':S.opDone?'✔ <b>¡Bien hecho!</b>':'<b>'+(S.k+1)+'/'+S.plan.length+'</b> · '+t;
@@ -584,12 +630,12 @@ function refresh(){
   }
   draw();
 }
-function unroll(d){if(S.step!==2||S.done)return;const n=S.A+d;if(n<-1e-9||n>LL()+1e-9)return;S.A=n;S.msg='';draw()}
+function unroll(d){if(S.step!==2||S.done)return;let n=r2(S.A+d);const T=LL();if(d>0&&n>T&&S.A<T-1e-9)n=T;if(d<0&&n<0&&S.A>1e-9)n=0;if(n<-1e-9||n>T+1e-9)return;S.A=n;S.msg='';draw()}
 function cutRoll(){
   if(S.step!==2||S.done)return;
   if(S.A<=0){S.msg='Primero desenrolla el rollo';S.bad=true;draw();return}
   const d=LL()-S.A;
-  if(Math.abs(d)<1e-9){S.done=true;S.msg=''}else{S.msg='Faltan '+fmt(d)+' M';S.bad=true}
+  if(Math.abs(d)<0.005){S.done=true;S.msg=''}else{S.msg='Faltan '+fmt(d)+' M';S.bad=true}
   refresh();
 }
 function finishOp(){S.opDone=true;refresh();clearTimeout(S.tm);S.tm=setTimeout(()=>{if(S.step===3&&S.opDone&&!S.fin)nextOp()},700)}
@@ -610,9 +656,20 @@ function ruler(x,y,len,hz,c,s){const f=v=>v*S.sc;let o='<g stroke="'+c+'" stroke
   else{o+='<line x1="'+f(x)+'" y1="'+f(y+p)+'" x2="'+f(x+s*tl)+'" y2="'+f(y+p)+'"/>';if(!(i%2))o+='<text stroke="none" x="'+f(x+s*.4)+'" y="'+(f(y+p)+4)+'" text-anchor="'+(s>0?'start':'end')+'">'+p+'</text>'}}
  return o+'</g>'}
 const GR='#0a8f3f',RD='#d11';
+
+function handSVG(cx,cy,sz,closed){
+  const k=sz/24,sk='fill="#ffd9a8" stroke="#5a3a1a" stroke-width="1.3" stroke-linejoin="round"';
+  let g='<g transform="translate('+(cx-sz/2)+' '+(cy-sz/2)+') scale('+k+')" style="pointer-events:none"><ellipse cx="12" cy="21.5" rx="8" ry="1.6" fill="#000" opacity=".18"/>';
+  if(closed){
+    g+='<rect x="4.5" y="8" width="15" height="11" rx="4.5" '+sk+'/><path d="M9.3 8.6v4.4M12.2 8v4.8M15.1 8.6v4.4" stroke="#5a3a1a" stroke-width="1.2" stroke-linecap="round" fill="none"/><rect x="3.4" y="12.6" width="9.5" height="4" rx="2" '+sk+'/>';
+  }else{
+    g+='<rect x="6.2" y="3.6" width="2.9" height="12" rx="1.45" '+sk+'/><rect x="9.2" y="2" width="2.9" height="13" rx="1.45" '+sk+'/><rect x="12.2" y="2.6" width="2.9" height="12.5" rx="1.45" '+sk+'/><rect x="15.2" y="4.4" width="2.9" height="11" rx="1.45" '+sk+'/>'
+      +'<rect x="2.6" y="10.5" width="3.2" height="8" rx="1.6" transform="rotate(-28 4.2 14.5)" '+sk+'/><rect x="5.6" y="11" width="12.8" height="9" rx="4.2" '+sk+'/>';
+  }
+  return g+'</g>'}
 const rotC=p=>({x:p.x+p.w/2,y:p.y+p.h+.5});
 function draw(){
-  S.cutBtn=null;
+  S.cutBtn=null;S.hand=false;
   if(S.step===1){check();return}
   if(S.fin){renderFinal();return}
   const l=S.l,a=S.a,s2=S.step===2,sw=OX+Math.max(l,LL())+.6,sc=S.sc=Math.min(70,780/sw),f=v=>v*sc;
@@ -631,7 +688,7 @@ function draw(){
     if(S.A>0)h+=wood(OX,TY,S.A,2,'h',S.done?'✔ Despachado':'',false,false)+ruler(OX,TY,S.A,true,'#fff',1)+dim(OX,TY+2.5,OX+S.A,TY+2.5,fmt(S.A)+' M',GR)+dim(OX+S.A+.5,TY,OX+S.A+.5,TY+2,'2 M',RD);
     h+='<line x1="'+f(OX+LL())+'" y1="'+f(TY-.25)+'" x2="'+f(OX+LL())+'" y2="'+f(TY+2.25)+'" stroke="'+GR+'" stroke-width="3" stroke-dasharray="3 4"/>'+tx(OX+LL()-1.6,TY-.35,'TOPE '+fmt(LL())+' M',GR);
     if(!S.done){
-      const atEnd=S.A>0&&Math.abs(S.A-LL())<1e-9;
+      const atEnd=S.A>0&&Math.abs(S.A-LL())<0.005;
       if(atEnd){
         h+='<line x1="'+f(OX)+'" y1="'+f(TY-.15)+'" x2="'+f(OX)+'" y2="'+f(TY+2.15)+'" stroke="#d00" stroke-width="3" stroke-dasharray="7 5"/>'+scis(OX-.4,TY-.2);
         const bw=Math.min(300,S.W-12),bh=64,cx=Math.max(bw/2+6,Math.min(f(OX+LL()/2),S.W-bw/2-6)),cy=f(TY+1);
@@ -659,11 +716,14 @@ function draw(){
         else h+=dim(act.x-.45,act.y,act.x-.45,act.y+op.at,fmt(op.at)+' M',RD)+'<line x1="'+f(act.x-.15)+'" y1="'+f(act.y+op.at)+'" x2="'+f(act.x+act.w+.15)+'" y2="'+f(act.y+op.at)+'" stroke="#d00" stroke-width="3.5" stroke-dasharray="7 5"/>'+scis(act.x+act.w,act.y+op.at+.2);
       }
       if(op.t==='rot'&&!S.opDone){const c=rotC(act);h+='<circle cx="'+f(c.x)+'" cy="'+f(c.y)+'" r="'+f(.35)+'" fill="#f07f0a" stroke="#fff" stroke-width="3"/><text x="'+f(c.x)+'" y="'+(f(c.y)+8)+'" text-anchor="middle" font-size="24" fill="#fff" font-weight="900" style="pointer-events:none">⟳</text>'}
-      const m=S.hover;
-      if(m&&op.t==='put'&&!S.opDone&&(S.drag||(m.x>=act.x&&m.x<=act.x+act.w&&m.y>=act.y&&m.y<=act.y+act.h)))h+='<text x="'+f(m.x-.25)+'" y="'+f(m.y+.35)+'" font-size="'+f(.8)+'" style="pointer-events:none">'+(S.drag?'✊':'✋')+'</text>';
+      const m=S.hover;let showHand=false;
+      if(m&&op.t==='put'&&!S.opDone&&(S.drag||(m.x>=act.x&&m.x<=act.x+act.w&&m.y>=act.y&&m.y<=act.y+act.h))){
+        const hs=Math.max(34,f(.9)),oy=m.t==='touch'?-hs*.8:0;
+        h+=handSVG(f(m.x),f(m.y)+oy,hs,!!S.drag);showHand=true}
+      S.hand=showHand;
     }
   }
-  const sv=$('svg2');sv.setAttribute('viewBox','0 0 '+S.W+' '+S.H);sv.innerHTML=h;check();
+  const sv=$('svg2');sv.style.cursor=S.hand?'none':'default';sv.setAttribute('viewBox','0 0 '+S.W+' '+S.H);sv.innerHTML=h;check();
 }
 function check(){
   const el=$('s-status');el.className='status';let t='';
@@ -674,7 +734,7 @@ function check(){
   else{el.style.display='none';return}
   el.style.display='';el.textContent=t;
 }
-function pt(e){const r=$('svg2').getBoundingClientRect(),k=S.W/r.width;return{x:(e.clientX-r.left)*k/S.sc,y:(e.clientY-r.top)*k/S.sc}}
+function pt(e){const r=$('svg2').getBoundingClientRect(),k=S.W/r.width;return{x:(e.clientX-r.left)*k/S.sc,y:(e.clientY-r.top)*k/S.sc,t:e.pointerType}}
 (function(){const s=$('svg2');
  s.addEventListener('pointerdown',e=>{
   if(S.step<2)return;const m=pt(e);S.hover=m;S.msg='';
@@ -690,13 +750,13 @@ function pt(e){const r=$('svg2').getBoundingClientRect(),k=S.W/r.width;return{x:
    const op=S.plan[S.k],p=S.P.find(q=>q.id===op.id);
    if(op.t==='cut'){const hit=op.ax==='v'?Math.abs(m.x-(p.x+op.at))<.35&&m.y>p.y-.3&&m.y<p.y+p.h+.3:Math.abs(m.y-(p.y+op.at))<.35&&m.x>p.x-.3&&m.x<p.x+p.w+.3;if(hit){doOp();return}}
    else if(op.t==='rot'){const c=rotC(p);if(Math.hypot(m.x-c.x,m.y-c.y)<.45){doOp();return}}
-   else if(m.x>=p.x&&m.x<=p.x+p.w&&m.y>=p.y&&m.y<=p.y+p.h){S.drag={k:'p',p,dx:m.x-p.x,dy:m.y-p.y};s.setPointerCapture(e.pointerId)}
+   else if(op.t==='put'&&m.x>=p.x&&m.x<=p.x+p.w&&m.y>=p.y&&m.y<=p.y+p.h){S.drag={k:'p',p,dx:m.x-p.x,dy:m.y-p.y};s.setPointerCapture(e.pointerId)}
   }
   draw();
  });
  s.addEventListener('pointermove',e=>{
   if(S.step<2)return;const m=pt(e);S.hover=m;const d=S.drag;
-  if(d&&d.k==='roll')S.A=Math.max(0,Math.min(snap5(m.x-OX),LL()));
+  if(d&&d.k==='roll'){const T=LL(),v=sn5(m.x-OX);S.A=Math.max(0,Math.min(Math.abs(v-T)<0.25?T:v,T))}
   else if(d&&d.k==='p'){d.p.x=m.x-d.dx;d.p.y=m.y-d.dy}
   draw();
  });
