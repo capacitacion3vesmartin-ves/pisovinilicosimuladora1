@@ -6,36 +6,95 @@
 <title>Calculador de Pisos Vinílicos</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Roboto',Arial,sans-serif}
-body{background:#f4f6f8;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:15px}
-.app-card{background:#fff;width:100%;max-width:560px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.08);padding:20px;display:flex;flex-direction:column;gap:15px}
-.header{text-align:center}
-.header h1{color:#0076a3;font-size:24px;font-weight:900;letter-spacing:-.5px;line-height:1.1;text-transform:uppercase}
-.header .subtitle{font-size:11px;font-style:italic;color:#555;margin-top:4px}
-.section-title{font-weight:700;font-size:15px;color:#222;margin-top:5px}
-.field-group{display:flex;flex-direction:column;gap:6px}
-.field-label{font-size:13px;color:#333;font-weight:500}
-.input-number-wrapper{display:flex;align-items:center;border:1px solid #0076a3;border-radius:6px;overflow:hidden;background:#fff}
-.input-number-wrapper input{width:100%;border:none;padding:10px;font-size:15px;outline:none;color:#333}
-.btn-step{background:none;border:none;padding:0 12px;font-size:18px;font-weight:bold;color:#0076a3;cursor:pointer;user-select:none;height:40px}
-.btn-step:active{background:#e0f2f7}
-.toggle-group{display:flex;gap:8px}
-.btn-toggle{flex:1;padding:10px 6px;border:1px solid #ccc;background:#f9f9f9;color:#555;font-weight:bold;font-size:13px;border-radius:6px;cursor:pointer;text-align:center;transition:all .2s}
-.btn-toggle.active{background:#006600;color:#fff;border-color:#006600}
-.btn-toggle.blue.active{background:#0076a3;border-color:#0076a3}
-.veta-header{font-size:18px;font-weight:900;text-align:center;margin-top:5px;text-transform:uppercase}
-.veta-header.largo{color:#d35400}.veta-header.ancho{color:#0076a3}
-.veta-img,.banner-img{width:100%;border-radius:6px;display:block;margin-top:2px}
-.results-container{display:flex;flex-direction:column;gap:10px}
-.result-row{display:flex;flex-direction:column;gap:4px}
-.result-label{font-size:12px;color:#333;font-weight:500}
-.result-input{width:100%;padding:8px 10px;font-size:14px;border:1px solid #e0e0e0;border-radius:6px;background:#f9f9f9;color:#555;outline:none}
-.notice-text{font-size:11px;font-weight:700;color:#222;line-height:1.3;margin-top:5px;text-transform:uppercase}
+html{scroll-behavior:smooth}
+body{background:#e8eff4;min-height:100vh;padding:max(12px,env(safe-area-inset-top)) 12px max(30px,env(safe-area-inset-bottom))}
 .hidden{display:none!important}
-.tabs{display:flex;gap:8px}
-.tabs .btn-toggle{font-size:14px;padding:12px}
-/* Simulador */
+
+/* ===== Estructura ===== */
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.hero{background:linear-gradient(135deg,#005a80,#0092c6);color:#fff;border-radius:16px;padding:18px 16px;text-align:center;box-shadow:0 6px 18px rgba(0,90,128,.28)}
+.hero h1{font-size:clamp(20px,5.2vw,30px);font-weight:900;letter-spacing:-.3px;line-height:1.1;text-transform:uppercase}
+.hero .subtitle{font-size:12px;font-style:italic;opacity:.85;margin-top:6px}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(0,40,70,.1);padding:18px;display:flex;flex-direction:column;gap:16px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;width:100%;max-width:560px;margin:0 auto}
+@media(min-width:900px){
+  .grid.with-prev{max-width:1180px;grid-template-columns:minmax(380px,480px) minmax(0,1fr);align-items:start}
+  .grid.with-prev .prev{position:sticky;top:14px}
+}
+
+/* ===== Calculadora ===== */
+.section-title{font-weight:900;font-size:18px;color:#0b2e40;text-transform:uppercase;letter-spacing:.4px}
+.field-group{display:flex;flex-direction:column;gap:7px}
+.field-label{font-size:14px;color:#222;font-weight:700}
+.input-number-wrapper{display:flex;align-items:center;border:2px solid #0076a3;border-radius:10px;overflow:hidden;background:#fff}
+.input-number-wrapper input{width:100%;min-width:0;border:none;padding:12px 14px;font-size:22px;font-weight:700;outline:none;color:#0b2e40;background:transparent}
+.btn-step{background:#eaf6fb;border:none;border-left:1px solid #cfe6f0;padding:0 18px;font-size:24px;font-weight:900;color:#0076a3;cursor:pointer;user-select:none;height:52px}
+.btn-step:active{background:#cde9f4}
+.input-number-wrapper.err{border-color:#b00020;background:#fdeaea}
+.input-number-wrapper.err input{background:#fdeaea}
+.toggle-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-toggle{padding:12px 8px;border:2px solid #cfd8dc;background:#f6f8f9;color:#4a5560;font-weight:700;font-size:14px;border-radius:10px;cursor:pointer;text-align:center;transition:all .15s}
+.btn-toggle.active{background:#006600;color:#fff;border-color:#006600;box-shadow:0 3px 8px rgba(0,102,0,.3)}
+.btn-toggle.blue.active{background:#0076a3;border-color:#0076a3;box-shadow:0 3px 8px rgba(0,118,163,.3)}
+.btn-toggle:disabled{opacity:.4;cursor:default}
+.choose .btn-toggle{padding:15px 8px;font-size:15px}
+.jump{display:none;text-align:center;text-decoration:none;background:#fff4e5;color:#a05a00;border:2px solid #f07f0a;border-radius:10px;padding:11px;font-weight:800;font-size:14px}
+@media(max-width:899px){.with-prev .jump{display:block}}
+
+.results{display:flex;flex-direction:column;gap:12px}
+.res-main{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#006b09,#0aa33f);color:#fff;border-radius:14px;padding:12px 18px;box-shadow:0 6px 16px rgba(0,110,20,.32)}
+.res-main::after{content:"";position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:translateX(-130%) skewX(-20deg);animation:shine 3.4s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%{transform:translateX(-130%) skewX(-20deg)}55%,100%{transform:translateX(380%) skewX(-20deg)}}
+@media(prefers-reduced-motion:reduce){.res-main::after{animation:none;display:none}}
+.res-main .rv{margin-top:0}
+.res-main .rl{font-size:16px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+.rv{display:flex;align-items:baseline;gap:8px;line-height:1;margin-top:6px;flex-wrap:wrap}
+.rv span{font-weight:900}
+.res-main .rv span{font-size:clamp(40px,10vw,54px)}
+.res-main .rv small{font-size:20px;font-weight:700}
+.rnd{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rnd .btn-toggle{padding:9px 4px;font-size:12px}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:420px){.res-grid{grid-template-columns:1fr}}
+.res-box{border:2.5px solid #0076a3;background:#eef8fc;border-radius:14px;padding:12px 14px}
+.res-box .rl{font-size:12px;font-weight:800;color:#00506e;text-transform:uppercase;letter-spacing:.3px}
+.res-box .rv span{font-size:36px;color:#0076a3}
+.res-box .rv small{font-size:16px;font-weight:800;color:#00506e}
+.res-box .rs{font-size:12px;font-weight:700;color:#3d4a52;margin-top:5px}
+.notice{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;background:#fff6d1;border:1.5px solid #e0b400}
+.notice .stripe{flex:none;width:16px;background:repeating-linear-gradient(-45deg,#1f1f1f 0 8px,#ffd400 8px 16px)}
+.notice .nic{flex:none;display:flex;align-items:center;padding:0 4px 0 10px}
+.notice .nic svg{width:30px;height:30px;display:block}
+.notice .ntx{flex:1;padding:9px 12px 9px 6px;font-size:12px;font-weight:700;color:#4a3b00;line-height:1.35}
+.notice .ntx b{display:block;font-size:13px;font-weight:900;letter-spacing:.8px;color:#7a1f00;margin-bottom:2px}
+
+/* ===== Vista previa en vivo ===== */
+.prev{display:none}
+.with-prev .prev{display:flex}
+.prev-title{font-size:20px;font-weight:900;color:#0b2e40;text-transform:uppercase}
+.prev-sub{font-size:14px;font-weight:700;margin-top:3px}
+.prev-sub.largo{color:#d35400}.prev-sub.ancho{color:#0076a3}.prev-sub.area{color:#5d6b73}
+.prev-vis{background:#f4f6f8;border-radius:12px;padding:10px;min-height:150px;display:flex;align-items:center;justify-content:center}
+.prev-vis svg{width:100%;height:auto;display:block}
+.prev-empty{font-size:15px;font-weight:700;color:#6b7780;text-align:center;padding:30px 14px;line-height:1.4}
+.prev-info{display:flex;flex-wrap:wrap;gap:8px}
+.chipx{background:#eef8fc;border:2px solid #0076a3;color:#00506e;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:800}
+.chipx.warn{background:#fdeaea;border-color:#d11;color:#a00}
+.prev-note{font-size:12px;color:#5d6b73;line-height:1.4}
+
+/* ===== Desplegable de aprendizaje ===== */
+.learn{width:100%;max-width:780px;margin:0 auto;padding:10px}
+.learn-btn{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:#fff8ec;border:2px solid #f07f0a;border-radius:12px;padding:15px 16px;font-size:17px;font-weight:900;color:#8a4a00;cursor:pointer;text-align:left}
+.learn-btn:active{background:#ffefd2}
+.learn-btn .chev{flex:none;width:11px;height:11px;border-right:3px solid #c25a00;border-bottom:3px solid #c25a00;transform:rotate(45deg);transition:transform .2s;margin:0 6px 4px}
+.learn-btn.open .chev{transform:rotate(-135deg);margin:4px 6px 0}
+.learn-body{padding:6px 6px 10px}
+.banner-img{width:100%;max-width:560px;margin:0 auto;border-radius:10px;display:block}
+
+/* ===== Simulador ===== */
+.hint{font-size:12px;color:#666;text-align:center}
 .dims{display:flex;gap:8px}
 .dims .field-group{flex:1}
 .dims input{width:100%;border:1px solid #0076a3;border-radius:6px;padding:9px;font-size:15px}
@@ -49,41 +108,30 @@ body{background:#f4f6f8;display:flex;justify-content:center;align-items:flex-sta
 .status{padding:10px 12px;border-radius:6px;font-size:14px;font-weight:700;background:#fff4e5;color:#a05a00}
 .status.ok{background:#e6f4e6;color:#006600}
 .status.bad{background:#fdeaea;color:#b00020}
-.hint{font-size:12px;color:#666;text-align:center}
-
-.stp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 .stp button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 4px;border:2px solid #dce5de;background:#fff;border-radius:12px;cursor:pointer;font-size:13px;position:relative}
 .stp i{font-style:normal;width:22px;height:22px;border-radius:50%;background:#dce5de;display:grid;place-items:center;font-weight:800;font-size:12px}
 .stp b{font-size:10px;color:#5d6b63}.stp span{font-weight:800}
-.stp button:first-child:after{content:"›";position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:800;color:#5d6b63}
+.stp button:first-child:after,.stp button:nth-child(2):after{content:"›";position:absolute;right:-13px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:800;color:#5d6b63}
 .stp .on{border-color:#f07f0a}.stp .on i{background:#f07f0a;color:#fff}.stp .on b{color:#f07f0a}
 .stp .ok i{background:#0a8f3f;color:#fff}
 .say{background:linear-gradient(135deg,#fff3d6,#ffe2a8);border:2px solid #f07f0a;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;color:#4a2c00;line-height:1.4}
 .say b{color:#c25a00}
-
-.app-card.wide{max-width:780px}
-.stp{grid-template-columns:1fr 1fr 1fr!important;gap:16px!important}
-.stp button:nth-child(2):after{content:"›";position:absolute;right:-13px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:800;color:#5d6b63}
 .col{display:flex;flex-direction:column;gap:12px}
 .chip{font-size:12px;color:#555;text-align:center}
 .sis{overflow-x:auto;border:1px solid #888;border-radius:4px}
 .sis table{border-collapse:collapse;width:100%;min-width:480px;font-size:12px}
 .sis th{background:linear-gradient(#2d4d6e,#1c3550);color:#fff;padding:8px 6px;font-weight:500}
 .sis td{background:#d4d0c8;border:1px solid #fff;padding:6px;text-align:center;color:#222}
-.sis input{width:80px;padding:6px;font-size:15px;font-weight:700;text-align:right;border:2px solid #0076a3;background:#fff;border-radius:3px}
+.sis input{width:80px;padding:6px;font-size:15px;font-weight:700;text-align:right;border:2px solid #f07f0a;background:#fff;border-radius:3px;box-shadow:0 0 0 3px rgba(240,127,10,.3)}
 .fact{background:#006600;color:#fff;border:none;border-radius:8px;padding:14px;font-size:16px;font-weight:900;cursor:pointer}
-.btn-toggle:disabled{opacity:.4;cursor:default}
 .role{text-align:center;font-weight:800;font-size:13px;padding:7px;border-radius:999px;color:#1e2a24}
 #s-formula{background:linear-gradient(135deg,#fff3d6,#ffe2a8);border:2.5px solid #f07f0a;border-radius:12px;padding:12px 14px;box-shadow:0 0 0 4px rgba(240,127,10,.15)}
 #s-formula .fx{font-size:20px;color:#c25a00}
 #s-formula .lbl{font-size:11px;font-weight:800;color:#8a5a00;text-transform:uppercase;letter-spacing:.5px}
 .arr{font-weight:800;color:#006600;text-align:center;margin-top:8px;font-size:14px;animation:bob 1s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(5px)}}
-.sis input{border-color:#f07f0a;box-shadow:0 0 0 3px rgba(240,127,10,.3)}
 .say.okk{background:#e6f4e6;border-color:#0a8f3f;color:#064b24}
-.blink{animation:bl 1s infinite}@keyframes bl{50%{opacity:.25}}
-
-/* v6: modal de vetas, explicación, botón de corte */
 .vinfo{font-size:12px;color:#444}
 .vinfo a{color:#0076a3;font-weight:700}
 .modal{position:fixed;inset:0;background:rgba(10,20,30,.58);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
@@ -105,15 +153,6 @@ body{background:#f4f6f8;display:flex;justify-content:center;align-items:flex-sta
 .ex-note{background:#fff;border:1px dashed #f07f0a;border-radius:8px;padding:8px 10px;margin-top:6px}
 .ex-cap{font-size:11px;color:#666;text-align:center;margin-top:2px}
 .pulse{animation:pl 1s ease-in-out infinite}@keyframes pl{50%{opacity:.65}}
-
-/* v8 */
-.ico{vertical-align:-3px;margin-right:5px}
-.vwrap{position:relative;margin-top:2px}.vwrap .veta-img{margin-top:0}
-.vsp{position:absolute;top:0;width:0}
-.vnum{position:absolute;white-space:nowrap;background:#fff;border:2px solid;border-radius:999px;font-weight:900;font-size:clamp(11px,3.4vw,19px);line-height:1;padding:.3em .65em;box-shadow:0 1px 4px rgba(0,0,0,.25)}
-.vnum-l{left:0;top:100%;transform:translateY(-50%);color:#1e6b1e;border-color:#1e6b1e}
-.vnum-a{left:0;top:100%;transform:translate(-50%,-100%) rotate(180deg);writing-mode:vertical-rl;color:#4a148c;border-color:#4a148c;padding:.65em .2em}
-.vnum.sm{font-size:clamp(9px,2.7vw,15px)}
 .fx-head{display:flex;width:100%;align-items:center;justify-content:space-between;gap:8px;background:none;border:none;cursor:pointer;text-align:left;padding:0}
 .chev{flex:none;width:9px;height:9px;border-right:3px solid #8a5a00;border-bottom:3px solid #8a5a00;transform:rotate(45deg);transition:transform .2s;margin:0 4px 3px}
 .chev.open{transform:rotate(-135deg);margin:3px 4px 0}
@@ -130,119 +169,168 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
 .sm-text p+p{margin-top:8px}
 .sm-res{background:#e6f4e6;border:2px solid #0a8f3f;border-radius:10px;padding:10px 12px;font-size:16px;font-weight:700;color:#064b24;text-align:center}
 .sm-nav{display:flex;gap:8px}
+.sm-nav .btn-toggle{flex:1}
 .bigflow{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 6px;font-size:34px;font-weight:900;color:#555}
 .bigflow .ok{color:#006600}.bigflow .ar{color:#f07f0a}
-/* v10 */
-.rowhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.rnd{display:flex;gap:6px}
-.rnd .btn-toggle{flex:none;padding:5px 10px;font-size:11px}
-.input-number-wrapper.err{border-color:#b00020;background:#fdeaea}
-.input-number-wrapper.err input{background:#fdeaea}
 .rm-box{max-width:420px;align-items:stretch}
 .rm-icon{font-size:42px;text-align:center;line-height:1}
 .rm-msg{font-size:15px;color:#222;text-align:center;line-height:1.45}
+.res-btn{text-align:left;cursor:pointer;font-family:inherit;display:block;width:100%;transition:transform .12s,box-shadow .12s}
+.res-btn:hover{box-shadow:0 4px 12px rgba(0,118,163,.3)}
+.res-btn:active{transform:scale(.98)}
+.res-box .tap{margin-top:8px;display:inline-block;background:#0076a3;color:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+.sobbox{border:2px solid #e8a3a3;background:#fff5f5;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;width:100%}
+.sobbox.ok{border-color:#9bd3a8;background:#f1faf3}
+.sobt{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:#a00}
+.sobbox.ok .sobt{color:#0a6b30}
+.sobi{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:15px;color:#333}
+.sobi b{font-size:21px;font-weight:900;color:#a00}
+.sobi span{font-size:13px;font-weight:700;color:#555;text-align:right}
+.sobtot{font-size:13px;font-weight:700;color:#555;border-top:1px dashed #e0b0b0;padding-top:6px}
+.sobn{font-size:16px;font-weight:800;color:#0a6b30}
+.dm-big{background:#e6f4e6;border:2px solid #0a8f3f;border-radius:10px;padding:10px 12px;text-align:center;color:#064b24;font-size:22px;font-weight:900}
+.dm-big small{display:block;font-size:13px;font-weight:700;margin-top:3px}
+.sm-text ol{padding-left:20px;display:flex;flex-direction:column;gap:7px}
 </style>
 </head>
 <body>
-<div class="app-card">
-  <div class="header">
-    <h1>CALCULADOR<br>DE PISOS VINÍLICOS</h1>
+<div class="wrap">
+  <div class="hero">
+    <h1>Calculador de pisos vinílicos</h1>
     <div class="subtitle">By: Capacitación V.E.S.</div>
   </div>
 
-  <div class="tabs">
-    <button class="btn-toggle blue active" id="tab-b-calc" onclick="showTab('calc')"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="5" width="10" height="4" rx="1" fill="currentColor"/><g fill="currentColor"><circle cx="8.5" cy="13" r="1.4"/><circle cx="12" cy="13" r="1.4"/><circle cx="15.5" cy="13" r="1.4"/><circle cx="8.5" cy="17" r="1.4"/><circle cx="12" cy="17" r="1.4"/><circle cx="15.5" cy="17" r="1.4"/></g></svg>Calculadora</button>
-    <button class="btn-toggle blue" id="tab-b-sim" onclick="showTab('sim')">✂️ Simulador</button>
-  </div>
-
-  <!-- ===== CALCULADORA ===== -->
-  <div id="tab-calc" style="display:flex;flex-direction:column;gap:15px">
-    <div class="field-group">
-      <label class="field-label" for="ancho">Ancho del área *</label>
-      <div class="input-number-wrapper" id="w-ancho">
-        <input type="number" id="ancho" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()" onchange="validarRegla()">
-        <button class="btn-step" onclick="adjustValue('ancho',-0.5)">−</button>
-        <button class="btn-step" onclick="adjustValue('ancho',0.5)">+</button>
-      </div>
-    </div>
-    <div class="field-group">
-      <label class="field-label" for="largo">Largo del área *</label>
-      <div class="input-number-wrapper" id="w-largo">
-        <input type="number" id="largo" step="0.01" min="0" placeholder="0.00" onfocus="this.select()" oninput="calcular()" onchange="validarRegla()">
-        <button class="btn-step" onclick="adjustValue('largo',-0.5)">−</button>
-        <button class="btn-step" onclick="adjustValue('largo',0.5)">+</button>
-      </div>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Priorizar estética</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-estetica-yes" class="btn-toggle" onclick="setPriorizarEstetica('Yes')">Yes</button>
-        <button type="button" id="btn-estetica-no" class="btn-toggle active" onclick="setPriorizarEstetica('No')">No</button>
-      </div>
-    </div>
-    <div id="veta-section" class="field-group hidden">
-      <label class="field-label">Dirección de veta</label>
-      <div class="toggle-group">
-        <button type="button" id="btn-veta-largo" class="btn-toggle active" onclick="setDireccionVeta('En dirección al largo')">En dirección al largo</button>
-        <button type="button" id="btn-veta-ancho" class="btn-toggle" onclick="setDireccionVeta('En dirección al ancho')">En dirección al ancho</button>
-      </div>
-      <div id="container-veta-largo">
-        <div class="veta-header largo">VETAS EN DIRECCIÓN A LO LARGO</div>
-        <div class="vwrap"><img src="https://image2url.com/r2/default/images/1774477413486-f65283b5-7de6-4f6f-abee-12385862ced7.jpg" alt="Vetas a lo largo" class="veta-img"><div class="vsp" style="left:5.9%;padding-top:29%"><span class="vnum vnum-a" data-k="ancho"></span></div><div class="vsp" style="left:56%;padding-top:64.2%"><span class="vnum vnum-l" data-k="largo"></span></div></div>
-      </div>
-      <div id="container-veta-ancho" class="hidden">
-        <div class="veta-header ancho">VETAS EN DIRECCIÓN A LO ANCHO</div>
-        <div class="vwrap"><img src="https://image2url.com/r2/default/images/1774477452466-3048d2ee-9fc2-4aea-ad79-c5bc739f893c.jpg" alt="Vetas a lo ancho" class="veta-img"><div class="vsp" style="left:5.9%;padding-top:29%"><span class="vnum vnum-a" data-k="ancho"></span></div><div class="vsp" style="left:56%;padding-top:64.2%"><span class="vnum vnum-l" data-k="largo"></span></div></div>
-      </div>
-    </div>
-    <div class="section-title">Resultado:</div>
-    <div class="results-container">
-      <div class="result-row"><div class="rowhead"><span class="result-label">Vendes (m2)</span><div class="rnd"><button type="button" class="btn-toggle blue active" id="rnd-up" onclick="setRedondeo('up')">Redondear ↑ arriba</button><button type="button" class="btn-toggle blue" id="rnd-down" onclick="setRedondeo('down')">Redondear ↓ abajo</button><button type="button" class="btn-toggle blue" id="rnd-real" onclick="setRedondeo('real')">Ver real</button></div></div><input type="text" id="res-vendes" class="result-input" value="0" readonly></div>
-      <div class="result-row"><span class="result-label">Le despachan al cliente:</span><input type="text" id="res-despachan" class="result-input" value="0 M lineales x 2 M (ancho de rollo)" readonly></div>
-      <div class="result-row"><span class="result-label">Pegamento o cola vinílica</span><input type="text" id="res-pegamento" class="result-input" value="0 galones" readonly></div>
-    </div>
-    <div class="notice-text">IMPORTANTE: El cálculo de materiales es aproximado. Siempre hay posibilidad que pueda sobrar o faltar material.</div>
-    <img src="https://image2url.com/r2/default/images/1774306178454-b0969afe-ce2f-4f2e-9e3f-aacfb880f5a9.jpg" alt="Capacitación VES" class="banner-img">
-  </div>
-
-  <!-- ===== SIMULADOR ===== -->
-  <div id="tab-sim" style="display:none;flex-direction:column;gap:12px">
-    <nav class="stp">
-      <button id="st1" onclick="goStep(1)"><i>1</i><b>PASO 1</b><span>Cálculo</span></button>
-      <button id="st2" onclick="goStep(2)"><i>2</i><b>PASO 2</b><span>Despacho</span></button>
-      <button id="st3"><i>3</i><b>PASO 3</b><span>Instalación</span></button>
-    </nav>
-    <div class="role" id="s-role"></div>
-    <div id="s1" class="col">
+  <div class="grid with-prev" id="grid">
+    <!-- ===== CALCULADORA ===== -->
+    <section class="card calc">
       <div class="field-group">
-        <label class="field-label">Priorizar estética</label>
-        <div class="toggle-group">
-          <button type="button" id="e-yes" class="btn-toggle" onclick="simEstetica(true)">Sí</button>
-          <button type="button" id="e-no" class="btn-toggle active" onclick="simEstetica(false)">No</button>
+        <label class="field-label" for="ancho">Ancho del área *</label>
+        <div class="input-number-wrapper" id="w-ancho">
+          <input type="number" id="ancho" step="0.01" min="0" placeholder="0.00" inputmode="decimal" onfocus="this.select()" oninput="calcular()" onchange="validarRegla()">
+          <button class="btn-step" onclick="adjustValue('ancho',-0.5)">−</button>
+          <button class="btn-step" onclick="adjustValue('ancho',0.5)">+</button>
         </div>
-        <div class="vinfo" id="e-info" style="display:none"></div>
       </div>
-      <div class="dims">
-        <div class="field-group"><label class="field-label">Ancho (m)</label><input type="number" id="s-a" value="3" min="1" max="20" step="any" oninput="simReset()" onchange="fixDims()"></div>
-        <div class="field-group"><label class="field-label">Largo (m)</label><input type="number" id="s-l" value="7" min="1" max="20" step="any" oninput="simReset()" onchange="fixDims()"></div>
+      <div class="field-group">
+        <label class="field-label" for="largo">Largo del área *</label>
+        <div class="input-number-wrapper" id="w-largo">
+          <input type="number" id="largo" step="0.01" min="0" placeholder="0.00" inputmode="decimal" onfocus="this.select()" oninput="calcular()" onchange="validarRegla()">
+          <button class="btn-step" onclick="adjustValue('largo',-0.5)">−</button>
+          <button class="btn-step" onclick="adjustValue('largo',0.5)">+</button>
+        </div>
       </div>
-      <div class="hint">Puedes usar decimales (ej. 3.25 m) · máximo 20 m</div>
-      <div class="formula" id="s-formula"></div>
-      <button type="button" class="btn-toggle blue" id="s-expbtn" onclick="toggleExp()">Ver resultado y cómo se calcula</button>
-      <div class="explain hidden" id="s-explain"></div>
-      <div class="sis"><table>
-        <tr><th>Artículo Pedido</th><th>UDM</th><th>Cantidad</th><th>Peso</th><th>Descripción Artículo</th></tr>
-        <tr><td>SNT.PY.000043</td><td>M2</td><td><input id="s-q" type="number" min="0" step="0.5" oninput="peso()"></td><td id="s-peso">0</td><td>PISO VINILICO LAMIFORT CEREZO X 2.00</td></tr>
-      </table></div>
-      <button class="fact" onclick="facturar()">Facturar</button>
-    </div>
-    <div class="chip" id="s-chip"></div>
-    <div class="say" id="s-say"></div>
-    <div class="tools" id="s-tools"></div>
-    <div class="stage" id="s-stage"><svg id="svg2" xmlns="http://www.w3.org/2000/svg" style="touch-action:none;user-select:none"></svg></div>
-    <div class="status" id="s-status"></div>
+
+      <div class="field-group choose">
+        <label class="field-label">Elige:</label>
+        <div class="toggle-group">
+          <button type="button" id="btn-estetica-yes" class="btn-toggle" onclick="setPriorizarEstetica('Yes')">Respetar veta</button>
+          <button type="button" id="btn-estetica-no" class="btn-toggle active" onclick="setPriorizarEstetica('No')">No respetar veta</button>
+        </div>
+      </div>
+
+      <div id="veta-section" class="field-group hidden">
+        <label class="field-label">Dirección de veta</label>
+        <div class="toggle-group">
+          <button type="button" id="btn-veta-largo" class="btn-toggle active" onclick="setDireccionVeta('En dirección al largo')">En dirección al largo</button>
+          <button type="button" id="btn-veta-ancho" class="btn-toggle" onclick="setDireccionVeta('En dirección al ancho')">En dirección al ancho</button>
+        </div>
+      </div>
+
+      <a class="jump" href="#prev">Ver cómo queda instalado ↓</a>
+      <div class="results">
+        <div class="section-title">Resultado</div>
+        <div class="res-main">
+          <div class="rl">Facturas:</div>
+          <div class="rv"><span id="res-vendes">0</span><small>m²</small></div>
+        </div>
+        <div class="rnd">
+          <button type="button" class="btn-toggle blue active" id="rnd-up" onclick="setRedondeo('up')">Redondear ↑ arriba</button>
+          <button type="button" class="btn-toggle blue" id="rnd-down" onclick="setRedondeo('down')">Redondear ↓ abajo</button>
+          <button type="button" class="btn-toggle blue" id="rnd-real" onclick="setRedondeo('real')">Ver real</button>
+        </div>
+        <div class="res-grid">
+          <button type="button" class="res-box res-btn" onclick="abrirDespacho()">
+            <div class="rl">Le despachan al cliente</div>
+            <div class="rv"><span id="res-despachan">0</span><small>M lineales</small></div>
+            <div class="rs">x 2 M (ancho de rollo)</div>
+            <div class="tap">Toca para ver cómo se despacha ›</div>
+          </button>
+          <div class="res-box">
+            <div class="rl">Pegamento o cola vinílica</div>
+            <div class="rv"><span id="res-pegamento">0</span><small id="res-pegunit">galones</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="notice" role="note"><div class="stripe"></div><div class="nic"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3.5 30 28H2z" fill="#ffd400" stroke="#1f1f1f" stroke-width="2.4" stroke-linejoin="round"/><rect x="14.6" y="11.5" width="2.8" height="9" rx="1.2" fill="#1f1f1f"/><circle cx="16" cy="24" r="1.7" fill="#1f1f1f"/></svg></div><div class="ntx"><b>IMPORTANTE</b>El cálculo de materiales es aproximado. Siempre hay posibilidad que pueda sobrar o faltar material.</div><div class="stripe"></div></div>
+    </section>
+
+    <!-- ===== VISTA PREVIA EN VIVO ===== -->
+    <aside class="card prev" id="prev">
+      <div>
+        <div class="prev-title">Así quedaría instalado</div>
+        <div class="prev-sub largo" id="prev-sub"></div>
+      </div>
+      <div class="prev-vis" id="prev-vis"></div>
+      <div class="prev-info" id="prev-info"></div>
+      <div class="prev-note" id="prev-note"></div>
+    </aside>
   </div>
 
+  <!-- ===== APRENDER CÓMO SE CALCULA ===== -->
+  <section class="card learn">
+    <button type="button" class="learn-btn" id="learn-btn" aria-expanded="false" onclick="toggleLearn()"><span>📘 Aprender cómo se calcula</span><i class="chev"></i></button>
+    <div id="learn-body" class="learn-body hidden">
+      <div id="tab-sim" style="display:flex;flex-direction:column;gap:12px">
+        <nav class="stp">
+          <button id="st1" onclick="goStep(1)"><i>1</i><b>PASO 1</b><span>Cálculo</span></button>
+          <button id="st2" onclick="goStep(2)"><i>2</i><b>PASO 2</b><span>Despacho</span></button>
+          <button id="st3"><i>3</i><b>PASO 3</b><span>Instalación</span></button>
+        </nav>
+        <div class="role" id="s-role"></div>
+        <div id="s1" class="col">
+          <div class="field-group">
+            <label class="field-label">Elige:</label>
+            <div class="toggle-group">
+              <button type="button" id="e-yes" class="btn-toggle" onclick="simEstetica(true)">Respetar veta</button>
+              <button type="button" id="e-no" class="btn-toggle active" onclick="simEstetica(false)">No respetar veta</button>
+            </div>
+            <div class="vinfo" id="e-info" style="display:none"></div>
+          </div>
+          <div class="dims">
+            <div class="field-group"><label class="field-label">Ancho (m)</label><input type="number" id="s-a" value="3" min="1" max="20" step="any" oninput="simReset()" onchange="fixDims()"></div>
+            <div class="field-group"><label class="field-label">Largo (m)</label><input type="number" id="s-l" value="7" min="1" max="20" step="any" oninput="simReset()" onchange="fixDims()"></div>
+          </div>
+          <div class="hint">Puedes usar decimales (ej. 3.25 m) · máximo 20 m</div>
+          <div class="formula" id="s-formula"></div>
+          <button type="button" class="btn-toggle blue" id="s-expbtn" onclick="toggleExp()">Ver resultado y cómo se calcula</button>
+          <div class="explain hidden" id="s-explain"></div>
+          <div class="sis"><table>
+            <tr><th>Artículo Pedido</th><th>UDM</th><th>Cantidad</th><th>Peso</th><th>Descripción Artículo</th></tr>
+            <tr><td>SNT.PY.000043</td><td>M2</td><td><input id="s-q" type="number" min="0" step="0.5" oninput="peso()"></td><td id="s-peso">0</td><td>PISO VINILICO LAMIFORT CEREZO X 2.00</td></tr>
+          </table></div>
+          <button class="fact" onclick="facturar()">Facturar</button>
+        </div>
+        <div class="chip" id="s-chip"></div>
+        <div class="say" id="s-say"></div>
+        <div class="tools" id="s-tools"></div>
+        <div class="stage" id="s-stage"><svg id="svg2" xmlns="http://www.w3.org/2000/svg" style="touch-action:none;user-select:none"></svg></div>
+        <div class="status" id="s-status"></div>
+      </div>
+    </div>
+  </section>
+
+  <img src="https://image2url.com/r2/default/images/1774306178454-b0969afe-ce2f-4f2e-9e3f-aacfb880f5a9.jpg" alt="Capacitación VES" class="banner-img">
+</div>
+
+<div class="modal hidden" id="dm" onclick="if(event.target===this)cerrarDespacho()">
+  <div class="modal-box">
+    <div class="mtitle">Así se despacha al cliente</div>
+    <div class="sm-vis" id="dm-vis"></div>
+    <div class="dm-big" id="dm-big"></div>
+    <div class="sm-text" id="dm-text"></div>
+    <button type="button" class="btn-toggle active" onclick="cerrarDespacho()">Entendido</button>
+  </div>
 </div>
 <div class="modal hidden" id="rm" onclick="if(event.target===this)cerrarRegla()">
   <div class="modal-box rm-box">
@@ -288,75 +376,197 @@ mark.hl{background:#ffd54f;color:#6b2d00;font-weight:900;padding:1px 6px;border-
   </div>
 </div>
 <script>
-/* ---------- Calculadora (original) ---------- */
+const $=id=>document.getElementById(id);
+/* ---------- Calculadora ---------- */
 let priorizarEstetica="No",direccionVeta="En dirección al largo";
 const r6=x=>Math.round(x*1e6)/1e6,cl=x=>Math.ceil(r6(x)),fl=x=>Math.floor(r6(x));
 let redondeo="up";
 function setRedondeo(v){redondeo=v;
-  document.getElementById('rnd-up').classList.toggle('active',v==='up');
-  document.getElementById('rnd-down').classList.toggle('active',v==='down');
-  document.getElementById('rnd-real').classList.toggle('active',v==='real');calcular()}
+  $('rnd-up').classList.toggle('active',v==='up');
+  $('rnd-down').classList.toggle('active',v==='down');
+  $('rnd-real').classList.toggle('active',v==='real');calcular()}
 function reglaInvalida(){
-  const a=parseFloat(document.getElementById('ancho').value)||0,l=parseFloat(document.getElementById('largo').value)||0;
+  const a=parseFloat($('ancho').value)||0,l=parseFloat($('largo').value)||0;
   return a>0&&l>0&&a>l;
 }
 function marcarRegla(){const bad=reglaInvalida();
-  document.getElementById('w-ancho').classList.toggle('err',bad);
-  document.getElementById('w-largo').classList.toggle('err',bad);return bad}
-function validarRegla(){if(marcarRegla())document.getElementById('rm').classList.remove('hidden');calcular()}
-function cerrarRegla(){document.getElementById('rm').classList.add('hidden')}
-function adjustValue(id,a){const i=document.getElementById(id);let v=parseFloat(i.value)||0;v=Math.max(0,v+a);i.value=v>0?v.toFixed(2):'';validarRegla()}
+  $('w-ancho').classList.toggle('err',bad);
+  $('w-largo').classList.toggle('err',bad);return bad}
+function validarRegla(){if(marcarRegla())$('rm').classList.remove('hidden');calcular()}
+function cerrarRegla(){$('rm').classList.add('hidden')}
+function adjustValue(id,a){const i=$(id);let v=parseFloat(i.value)||0;v=Math.max(0,v+a);i.value=v>0?v.toFixed(2):'';validarRegla()}
 function setPriorizarEstetica(v){priorizarEstetica=v;
-  document.getElementById('btn-estetica-yes').classList.toggle('active',v==='Yes');
-  document.getElementById('btn-estetica-no').classList.toggle('active',v!=='Yes');
-  document.getElementById('veta-section').classList.toggle('hidden',v!=='Yes');calcular()}
+  const yes=v==='Yes';
+  $('btn-estetica-yes').classList.toggle('active',yes);
+  $('btn-estetica-no').classList.toggle('active',!yes);
+  $('veta-section').classList.toggle('hidden',!yes);
+  calcular()}
 function setDireccionVeta(v){direccionVeta=v;const l=v==='En dirección al largo';
-  document.getElementById('btn-veta-largo').classList.toggle('active',l);
-  document.getElementById('btn-veta-ancho').classList.toggle('active',!l);
-  document.getElementById('container-veta-largo').classList.toggle('hidden',!l);
-  document.getElementById('container-veta-ancho').classList.toggle('hidden',l);calcular()}
-function updVetaNums(){
-  const fv=id=>{const n=parseFloat(document.getElementById(id).value);return n>0?(Math.round(n*100)/100)+' m':''};
-  const vals={ancho:fv('ancho'),largo:fv('largo')};
-  document.querySelectorAll('.vnum').forEach(e=>{const t=vals[e.dataset.k];e.textContent=t;e.style.display=t?'':'none';e.classList.toggle('sm',t.length>5)});
+  $('btn-veta-largo').classList.toggle('active',l);
+  $('btn-veta-ancho').classList.toggle('active',!l);calcular()}
+function simInstall(l,a,L0){
+  const plan=buildPlan('area',l,a,L0,true);if(!plan||(buildPlan.bad&&!buildPlan.miss))return null;const miss=buildPlan.miss;
+  const P=[{id:0,x:0,y:0,w:L0,h:2,g:'h',locked:false}];let nid=1;
+  for(const op of plan){const p=P.find(q=>q.id===op.id);
+    if(op.t==='cut'){if(op.ax==='v'){P.push({...p,id:nid++,x:r2(p.x+op.at),w:r2(p.w-op.at)});p.w=op.at}else{P.push({...p,id:nid++,y:r2(p.y+op.at),h:r2(p.h-op.at)});p.h=op.at}}
+    else if(op.t==='rot'){const t=p.w;p.w=p.h;p.h=t;p.g=p.g==='h'?'v':'h'}
+    else if(op.t==='fill'){p.w=op.w;p.h=op.h}
+    else{p.x=op.x;p.y=op.y;p.locked=true}}
+  P.miss=miss;return P;
 }
+/* Cuarto ya instalado sin respetar veta: piezas colocadas (pueden ir giradas) */
+function installSVG(P,a,l,miss){
+  const M=Math.max(l,a)*.1+.35,vw=l+2*M,vh=a+2*M,B=Math.max(vw,vh),fs=B/24,lw=B/260;
+  let h='<svg viewBox="0 0 '+vw+' '+vh+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">';
+  h+='<rect x="'+(M-lw*2)+'" y="'+(M-lw*2)+'" width="'+(l+lw*4)+'" height="'+(a+lw*4)+'" fill="#4a545c"/>';
+  P.forEach((p,i)=>{const x=M+p.x,y=M+p.y;
+    h+='<rect x="'+x+'" y="'+y+'" width="'+p.w+'" height="'+p.h+'" fill="'+(i%2?'#c99560':'#d6a66f')+'"/>';
+    if(p.g==='h')for(let yy=y+.125;yy<y+p.h;yy+=.25)h+='<line x1="'+x+'" y1="'+yy+'" x2="'+(x+p.w)+'" y2="'+yy+'" stroke="#6b3f1c" stroke-opacity=".35" stroke-width="'+lw+'"/>';
+    else for(let xx=x+.125;xx<x+p.w;xx+=.25)h+='<line x1="'+xx+'" y1="'+y+'" x2="'+xx+'" y2="'+(y+p.h)+'" stroke="#6b3f1c" stroke-opacity=".35" stroke-width="'+lw+'"/>';
+    h+='<rect x="'+x+'" y="'+y+'" width="'+p.w+'" height="'+p.h+'" fill="none" stroke="#fff" stroke-width="'+(lw*1.6)+'"/>';});
+  if(miss&&miss.w>.004&&miss.h>.004){const hid='ht'+(++_uid),x=M+miss.x,y=M+miss.y;
+    h+='<defs><pattern id="'+hid+'" width="'+(B/55)+'" height="'+(B/55)+'" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="'+(B/55)+'" stroke="#d11" stroke-width="'+(B/260)+'"/></pattern></defs>';
+    h+='<rect x="'+x+'" y="'+y+'" width="'+miss.w+'" height="'+miss.h+'" fill="url(#'+hid+')" stroke="#d11" stroke-width="'+(lw*2)+'" stroke-dasharray="'+(lw*6)+' '+(lw*4)+'"/>';
+    if(miss.w>fs*2.6)h+='<text x="'+(x+miss.w/2)+'" y="'+(y+miss.h/2+fs*.3)+'" text-anchor="middle" font-size="'+(fs*.8)+'" font-weight="900" fill="#d11" stroke="#fff" stroke-width="'+(lw*3)+'" paint-order="stroke">falta</text>';}
+  h+='<text x="'+(M+l/2)+'" y="'+(M+a+M*.65)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#d11">'+fmt(l)+' m</text>';
+  h+='<text transform="translate('+(M*.45)+' '+(M+a/2)+') rotate(-90)" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="#0a8f3f">'+fmt(a)+' m</text>';
+  return h+'</svg>';
+}
+function renderPreview(a,l,bad){
+  const vis=$('prev-vis'),info=$('prev-info'),sub=$('prev-sub'),note=$('prev-note');
+  const yes=priorizarEstetica==='Yes',lg=direccionVeta==='En dirección al largo';
+  sub.className='prev-sub '+(yes?(lg?'largo':'ancho'):'area');
+  sub.textContent=(yes?'Vetas '+(lg?'al largo':'al ancho'):'Sin respetar la veta')+(a>0&&l>0&&!bad?' · '+fmt(a)+' m × '+fmt(l)+' m':'');
+  note.textContent=yes?'Las líneas marcan la dirección de las vetas. La zona rayada en rojo es el material que sobra.':'Aquí la veta no importa: las piezas se aprovechan al máximo y algunas pueden quedar giradas o unidas con retazos.';
+  if(bad){vis.innerHTML='<div class="prev-empty">Revisa las medidas:<br>el ancho debe ser menor o igual al largo.</div>';info.innerHTML='';return}
+  if(!(a>0&&l>0)){vis.innerHTML='<div class="prev-empty">Escribe el ancho y el largo<br>para ver cómo quedaría instalado.</div>';info.innerHTML='';return}
+  const chip=t=>'<span class="chipx">'+t+'</span>';
+  let chips='',sobs=[],tot=0,miss='';
+  if(yes){
+    const cross=lg?a:l,len=lg?l:a,n=cl(cross/2),lastC=r6(cross-2*(n-1)),wl=lastC<2?r6(2-lastC):0;
+    vis.innerHTML=roomSVG(lg?'largo':'ancho',a,l,{waste:true});
+    chips=chip(n+(n===1?' tira':' tiras')+' de '+fmt(len)+' m')+chip(fmt(n*len)+' M lineales');
+    if(wl>0)sobs.push({d:fmt(len)+' × '+fmt(wl)+' m',m:r6(len*wl),k:1});
+    tot=Math.max(0,r6(n*len*2-a*l));
+  }else{
+    const L0=cl(a*l)/2;let P=null;
+    try{P=simInstall(l,a,L0)}catch(e){P=null}
+    if(!P){vis.innerHTML='<div class="prev-empty">Con estas medidas, sin respetar la veta, los retazos no alcanzan para completar el piso con piezas enteras.<br>Conviene elegir «Respetar veta».</div>';info.innerHTML='';return}
+    const placed=P.filter(p=>p.locked);
+    vis.innerHTML=installSVG(placed,a,l,P.miss);
+    chips=chip(fmt(L0)+' M lineales');
+    const g={};
+    P.filter(p=>!p.locked&&p.w>.004&&p.h>.004).forEach(p=>{const A=Math.max(p.w,p.h),Bm=Math.min(p.w,p.h),k=fmt(A)+' × '+fmt(Bm)+' m';(g[k]=g[k]||{d:k,m:r6(A*Bm),k:0}).k++});
+    sobs=Object.values(g);
+    tot=r6(sobs.reduce((t,x)=>t+x.m*x.k,0));
+    if(P.miss&&P.miss.w>.004&&P.miss.h>.004){miss='<div class="sobbox"><div class="sobt">Falta cubrir (no alcanza el material)</div><div class="sobi"><b>'+fmt(P.miss.w)+' × '+fmt(P.miss.h)+' m</b><span>'+fmt(r6(P.miss.w*P.miss.h))+' m² sin piso</span></div></div>';note.textContent+=' La zona rayada en rojo quedaría sin piso.'}
+    if(placed.some(p=>p.g==='v'))note.textContent+=' Las piezas giradas se ven con la veta en otra dirección.';
+  }
+  let sb;
+  if(tot<=.004)sb='<div class="sobbox ok"><div class="sobt">Lo que sobra</div><div class="sobn">No sobra material</div></div>';
+  else sb='<div class="sobbox"><div class="sobt">Lo que sobra (cuánto por cuánto)</div>'+sobs.map(x=>'<div class="sobi"><b>'+x.d+'</b><span>'+(x.k>1?x.k+' piezas · ':'')+fmt(r6(x.m*x.k))+' m²</span></div>').join('')+'<div class="sobtot">Total que sobra: <b>'+fmt(tot)+' m²</b></div></div>';
+  info.innerHTML='<div class="chips">'+chips+'</div>'+miss+sb;
+}
+let CALC={m2:0};
 function calcular(){
-  updVetaNums();
-  const largo=parseFloat(document.getElementById('largo').value)||0,ancho=parseFloat(document.getElementById('ancho').value)||0;
-  if(marcarRegla()||largo<=0||ancho<=0){document.getElementById('res-vendes').value="0";document.getElementById('res-despachan').value="0 M lineales x 2 M (ancho de rollo)";document.getElementById('res-pegamento').value="0 galones";return}
+  const largo=parseFloat($('largo').value)||0,ancho=parseFloat($('ancho').value)||0;
+  const bad=marcarRegla();
+  if(bad||largo<=0||ancho<=0){
+    CALC={m2:0};
+    $('res-vendes').textContent="0";$('res-despachan').textContent="0";$('res-pegamento').textContent="0";$('res-pegunit').textContent="galones";
+    renderPreview(ancho,largo,bad);return}
   let m2;
   const rd=redondeo==='up'?cl:redondeo==='down'?fl:(x=>Math.round(x*100)/100);
   if(priorizarEstetica==="No")m2=rd(largo*ancho);
   else if(direccionVeta==="En dirección al largo")m2=rd(cl(ancho/2)*largo*2);
   else m2=rd(cl(largo/2)*ancho*2);
-  document.getElementById('res-vendes').value=m2;
-  document.getElementById('res-despachan').value=(Math.round(m2/2*100)/100)+" M lineales x 2 M (ancho de rollo)";
-  document.getElementById('res-pegamento').value=cl(largo*ancho/13)+" galones";
+  CALC={m2,a:ancho,l:largo,est:priorizarEstetica==='Yes',lg:direccionVeta==='En dirección al largo'};
+  $('res-vendes').textContent=m2;
+  $('res-despachan').textContent=Math.round(m2/2*100)/100;
+  const g=cl(largo*ancho/13);
+  $('res-pegamento').textContent=g;$('res-pegunit').textContent=g===1?'galón':'galones';
+  renderPreview(ancho,largo,false);
 }
 
-/* ---------- Pestañas ---------- */
-function showTab(t){
-  const c=t==='calc';
-  document.getElementById('tab-calc').style.display=c?'flex':'none';
-  document.getElementById('tab-sim').style.display=c?'none':'flex';
-  document.getElementById('tab-b-calc').classList.toggle('active',c);
-  document.getElementById('tab-b-sim').classList.toggle('active',!c);
-  document.querySelector('.app-card').classList.toggle('wide',!c);if(!c)simReset();
+/* ---------- Ventana de despacho ---------- */
+function rolloSVG(L,n,len){
+  const id='cy'+(++_uid),hh=Math.max(2,(L+3)/6.5),rx=hh*.42,x0=rx+hh*.25,M=hh*.5,vw=x0+L+hh*1.6,vh=M+hh+hh*1.15,B=Math.max(vw,vh*1.7),fs=B/26,lw=B/300;
+  let h='<svg viewBox="0 0 '+vw+' '+vh+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">';
+  h+='<defs><linearGradient id="'+id+'" x1="0" x2="1"><stop offset="0" stop-color="#6e4222"/><stop offset=".45" stop-color="#e2b685"/><stop offset="1" stop-color="#7a4b25"/></linearGradient></defs>';
+  h+='<text x="'+x0+'" y="'+(M*.62)+'" font-size="'+(fs*.62)+'" font-weight="800" fill="#d35400">ROLLO · 2 M de ancho</text>';
+  if(L>=10)h+='<text x="'+(x0+L)+'" y="'+(M*.62)+'" text-anchor="end" font-size="'+(fs*.62)+'" font-weight="800" fill="#0a8f3f">TOPE '+fmt(L)+' M</text>';
+  h+='<rect x="'+(x0-rx)+'" y="'+M+'" width="'+rx+'" height="'+hh+'" rx="'+(hh*.06)+'" fill="url(#'+id+')" stroke="#4a2c12" stroke-width="'+(lw*1.5)+'"/>';
+  for(let k=0;k<n;k++){const x=x0+k*len;
+    h+='<rect x="'+x+'" y="'+M+'" width="'+len+'" height="'+hh+'" fill="'+(k%2?'#c99560':'#d6a66f')+'"/>';}
+  for(let yy=M+hh/8;yy<M+hh-.001;yy+=hh/8)h+='<line x1="'+x0+'" y1="'+yy+'" x2="'+(x0+L)+'" y2="'+yy+'" stroke="#6b3f1c" stroke-opacity=".35" stroke-width="'+lw+'"/>';
+  for(let k=1;k<n;k++){const x=x0+k*len;h+='<line x1="'+x+'" y1="'+M+'" x2="'+x+'" y2="'+(M+hh)+'" stroke="#fff" stroke-width="'+(lw*2.5)+'"/>';
+    }
+  if(n>1)for(let k=0;k<n;k++)if(len>fs*4.5){const x=x0+k*len;h+='<text x="'+(x+len/2)+'" y="'+(M+hh*.88)+'" text-anchor="middle" font-size="'+(fs*.9)+'" font-weight="800" fill="#fff" stroke="#4a2c12" stroke-width="'+(lw*3)+'" paint-order="stroke">tira '+(k+1)+'</text>';}
+  h+='<rect x="'+x0+'" y="'+M+'" width="'+L+'" height="'+hh+'" fill="none" stroke="#fff" stroke-width="'+(lw*2)+'"/>';
+  const step=L<=12?1:L<=30?2:L<=60?5:L<=120?10:20;
+  h+='<g stroke="#fff" stroke-width="'+(lw*1.5)+'" fill="#fff">';
+  for(let i=0;i<=L+1e-9;i+=step){const x=x0+i;h+='<line x1="'+x+'" y1="'+M+'" x2="'+x+'" y2="'+(M+hh*.13)+'"/><text stroke="#6b3f1c" stroke-width="'+(lw*2)+'" paint-order="stroke" x="'+x+'" y="'+(M+hh*.13+fs*.95)+'" text-anchor="middle" font-size="'+(fs*.62)+'" font-weight="700">'+i+'</text>';}
+  h+='</g>';
+  h+='<line x1="'+(x0+L)+'" y1="'+(M-hh*.12)+'" x2="'+(x0+L)+'" y2="'+(M+hh*1.12)+'" stroke="#0a8f3f" stroke-width="'+(lw*3)+'" stroke-dasharray="'+(lw*4)+' '+(lw*4)+'"/>';
+  const ty=M+hh+hh*.55,lab=fmt(L)+' M',pw=fs*(lab.length*.62+1.6);
+  h+='<g stroke="#0a8f3f" stroke-width="'+(lw*3)+'"><line x1="'+x0+'" y1="'+ty+'" x2="'+(x0+L)+'" y2="'+ty+'"/><line x1="'+x0+'" y1="'+(ty-fs*.45)+'" x2="'+x0+'" y2="'+(ty+fs*.45)+'"/><line x1="'+(x0+L)+'" y1="'+(ty-fs*.45)+'" x2="'+(x0+L)+'" y2="'+(ty+fs*.45)+'"/></g>';
+  h+='<rect x="'+(x0+L/2-pw/2)+'" y="'+(ty-fs*.95)+'" width="'+pw+'" height="'+(fs*1.9)+'" rx="'+(fs*.95)+'" fill="#fff" stroke="#0a8f3f" stroke-width="'+(lw*2)+'"/><text x="'+(x0+L/2)+'" y="'+(ty+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#0a6b30">'+lab+'</text>';
+  const rxp=x0+L+hh*.3;
+  h+='<g stroke="#d11" stroke-width="'+(lw*3)+'"><line x1="'+rxp+'" y1="'+M+'" x2="'+rxp+'" y2="'+(M+hh)+'"/><line x1="'+(rxp-fs*.4)+'" y1="'+M+'" x2="'+(rxp+fs*.4)+'" y2="'+M+'"/><line x1="'+(rxp-fs*.4)+'" y1="'+(M+hh)+'" x2="'+(rxp+fs*.4)+'" y2="'+(M+hh)+'"/></g>';
+  h+='<text transform="translate('+(rxp+fs*1.3)+' '+(M+hh/2)+') rotate(-90)" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#d11">2 M</text>';
+  return h+'</svg>';
+}
+function abrirDespacho(){
+  const c=CALC,vis=$('dm-vis'),big=$('dm-big'),tx=$('dm-text');
+  if(!(c.m2>0)){
+    vis.innerHTML='<div class="prev-empty">Escribe el ancho y el largo del área<br>para ver cómo se despacha.</div>';big.style.display='none';tx.innerHTML='';
+  }else{
+    big.style.display='';
+    const L=Math.round(c.m2/2*100)/100,B=x=>'<b>'+x+'</b>';
+    let n=1,len=L,tiras=false;
+    if(c.est){const cross=c.lg?c.a:c.l,ln=c.lg?c.l:c.a,nn=cl(cross/2);if(Math.abs(nn*ln*2-c.m2)<.005){tiras=true;n=nn;len=ln}}
+    vis.innerHTML=rolloSVG(L,tiras?n:1,tiras?len:L);
+    big.innerHTML=fmt(L)+' M de largo × 2 M de ancho<small>= '+fmt(c.m2)+' m² (lo que se factura)</small>';
+    const rt=redondeo==='up'?'hacia arriba':redondeo==='down'?'hacia abajo':'sin redondear';
+    let st=['Se facturan '+B(fmt(c.m2)+' m²')+'.',
+      'El rollo mide '+B('2 M de ancho')+', así que cada metro lineal que se estira da '+B('2 m²')+'.',
+      'Por eso se divide: '+B(fmt(c.m2)+' ÷ 2 = '+fmt(L)+' M lineales')+'. Ese es el largo que se corta del rollo.'];
+    if(tiras)st.push('Con vetas '+(c.lg?'al largo':'al ancho')+' son '+B(n+(n===1?' tira':' tiras')+' de '+fmt(len)+' m')+' una detrás de otra: '+n+' × '+fmt(len)+' = '+B(fmt(n*len)+' M lineales')+'.');
+    else if(!c.est)st.push('Como no se respeta la veta, se calcula por área: '+fmt(c.a)+' × '+fmt(c.l)+' = '+fmt(r6(c.a*c.l))+' m² ('+rt+') = '+B(fmt(c.m2)+' m²')+'.');
+    st.push('Al cliente le despachan '+B(fmt(L)+' M de largo × 2 M de ancho = '+fmt(c.m2)+' m²')+'.');
+    tx.innerHTML='<ol>'+st.map(x=>'<li>'+x+'</li>').join('')+'</ol>';
+  }
+  $('dm').classList.remove('hidden');
+}
+function cerrarDespacho(){$('dm').classList.add('hidden')}
+
+/* ---------- Desplegable ---------- */
+let learnOpened=false;
+function toggleLearn(){
+  const b=$('learn-body'),open=b.classList.toggle('hidden')===false;
+  $('learn-btn').classList.toggle('open',open);$('learn-btn').setAttribute('aria-expanded',open);
+  if(open){
+    const a=parseFloat($('ancho').value),l=parseFloat($('largo').value);
+    if(a>0&&l>0&&a<=l&&l<=MAXD&&(Math.abs(a-S.a)>1e-9||Math.abs(l-S.l)>1e-9)){$('s-a').value=a;$('s-l').value=l;simReset()}
+    else if(!learnOpened)simReset();
+    learnOpened=true;
+    setTimeout(()=>$('learn-btn').scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }
 }
 
 /* ---------- Simulador por pasos ---------- */
 const S={a:3,l:7,mode:'area',step:1,billed:0,P:[],A:0,done:false,plan:[],k:0,opDone:false,fin:false,drag:null,hover:null,msg:'',sc:40,W:0,H:0,nid:0,exp:false,fx:false,cutBtn:null};
-const TY=1.2,OX=2.1,RY=TY+3.6,$=id=>document.getElementById(id);
+const TY=1.2,OX=2.1,RY=TY+3.6;
 const fmt=n=>(Math.round(n*100)/100).toString(),snap5=v=>Math.round(v*100)/100,r2=v=>Math.round(v*100)/100,sn5=v=>Math.round(v*2)/2,LL=()=>S.billed/2;
-const NAMES={area:'Por área',largo:'Estética · veta al largo',ancho:'Estética · veta al ancho'};
+const NAMES={area:'No respetar veta',largo:'Respetar veta · al largo',ancho:'Respetar veta · al ancho'};
 function m2(){const{a,l,mode}=S,c=x=>Math.ceil(Math.round(x*1e6)/1e6);return mode==='area'?c(a*l):mode==='largo'?c(c(a/2)*l*2):c(c(l/2)*a*2)}
 const FORM={
  area:["m² = ancho × largo (redondeado hacia arriba)","Sin importar las vetas ni cuántas piezas queden."],
  largo:["m² = (ancho ÷ 2, redondeado hacia arriba) × largo × 2","Vetas en el sentido del largo. <b>Se compra más m².</b>"],
  ancho:["m² = (largo ÷ 2, redondeado hacia arriba) × ancho × 2","Vetas en el sentido del ancho. <b>Se compra más m².</b>"]};
 /* Plan de corte: lista de pasos (cortar / girar / colocar) calculada de antemano */
-function buildPlan(mode,l,a,L0){
-  const V=[{id:0,w:L0,h:2}];let nid=1,bad=false;const ops=[],E=1e-9,get=id=>V.find(p=>p.id===id);
+function buildPlan(mode,l,a,L0,part){
+  const V=[{id:0,w:L0,h:2}];let nid=1,bad=false,miss=null;const ops=[],E=1e-9,get=id=>V.find(p=>p.id===id);
   const cut=(id,ax,at)=>{const p=get(id);at=snap5(at);
     if(ax==='v'){if(at<=0||at>=p.w)bad=true;V.push({id:nid,w:r2(p.w-at),h:p.h});p.w=at}
     else{if(at<=0||at>=p.h)bad=true;V.push({id:nid,w:p.w,h:r2(p.h-at)});p.h=at}
@@ -385,8 +595,8 @@ function buildPlan(mode,l,a,L0){
         p=get(sub);
         if(p.w>need+E)cut(sub,'v',need);
         put(sub,x,2*nf);x=r2(x+get(sub).w);need=r2(need-get(sub).w);sub=nxt}
-      if(need>E)bad=true}}
-  return bad?null:ops;
+      if(need>E){bad=true;miss={x:r2(l-need),y:2*nf,w:need,h:r}}}}
+  buildPlan.bad=bad;buildPlan.miss=miss;return bad&&!part?null:ops;
 }
 function apply(op){const p=S.P.find(q=>q.id===op.id);
   if(op.t==='cut'){if(op.ax==='v'){S.P.push({...p,id:S.nid++,x:r2(p.x+op.at),w:r2(p.w-op.at)});p.w=op.at}else{S.P.push({...p,id:S.nid++,y:r2(p.y+op.at),h:r2(p.h-op.at)});p.h=op.at}}
@@ -406,7 +616,7 @@ function openVeta(){
 }
 function vetaPick(m){$('vm').classList.add('hidden');setMode(m)}
 function vetaCancel(){$('vm').classList.add('hidden');refresh()}
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('sm').classList.contains('hidden'))stepClose();else if(!$('vm').classList.contains('hidden'))vetaCancel()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('sm').classList.contains('hidden'))stepClose();else if(!$('vm').classList.contains('hidden'))vetaCancel();else if(!$('dm').classList.contains('hidden'))cerrarDespacho();else if(!$('rm').classList.contains('hidden'))cerrarRegla()});
 function fSteps(){
   const a=S.a,l=S.l,B=x=>'<b>'+x+'</b>',q=m2();let r=[];
   if(S.mode==='area'){
@@ -423,7 +633,7 @@ function hintMal(q){
   if(S.mode==='area')return '';
   const lg=S.mode==='largo',cross=lg?S.a:S.l,len=lg?S.l:S.a;
   if(Math.abs(q-cross*len*2)<1e-9)return ' Parece que multiplicaste el '+(lg?'ancho':'largo')+' completo ('+fmt(cross)+'). Primero se divide entre 2: '+fmt(cross)+' ÷ 2 = '+fmt(cross/2)+(Number.isInteger(cross/2)?'':' (se redondea hacia arriba)')+'.';
-  if(Math.abs(q-Math.ceil(S.a*S.l))<1e-9)return ' Ese es el área del cuarto. Con estética se compran tiras completas.';
+  if(Math.abs(q-Math.ceil(S.a*S.l))<1e-9)return ' Ese es el área del cuarto. Respetando la veta se compran tiras completas.';
   return ' Usa el botón «Ver resultado» para ver el paso a paso.';
 }
 function toggleFx(){S.fx=!S.fx;refresh()}
@@ -458,6 +668,12 @@ function roomSVG(mode,a,l,o){
     const wx0=lg?M:M+l,wy0=lg?M+a:M,ww=lg?l:wl,wh=lg?wl:a;
     h+='<rect x="'+wx0+'" y="'+wy0+'" width="'+ww+'" height="'+wh+'" fill="url(#'+hid+')" stroke="#d11" stroke-width="'+(lw*2)+'" stroke-dasharray="'+(lw*6)+' '+(lw*4)+'"/>';
     h+='<text x="'+(wx0+ww/2)+'" y="'+(wy0+wh/2+fs*.35)+'" text-anchor="middle" font-size="'+(fs*.9)+'" font-weight="900" fill="#d11" stroke="#fff" stroke-width="'+(lw*3)+'" paint-order="stroke">sobra</text>';
+    const xr=wx0+ww+M*.22,cr=fs*.3;
+    h+='<g stroke="#d11" stroke-width="'+(lw*2.5)+'"><line x1="'+xr+'" y1="'+wy0+'" x2="'+xr+'" y2="'+(wy0+wh)+'"/><line x1="'+(xr-cr)+'" y1="'+wy0+'" x2="'+(xr+cr)+'" y2="'+wy0+'"/><line x1="'+(xr-cr)+'" y1="'+(wy0+wh)+'" x2="'+(xr+cr)+'" y2="'+(wy0+wh)+'"/></g>';
+    h+='<text transform="translate('+(xr+fs*.95)+' '+(wy0+wh/2)+') rotate(-90)" text-anchor="middle" font-size="'+(fs*.9)+'" font-weight="800" fill="#d11">'+fmt(wh)+' m</text>';
+    if(!lg){const yb=wy0+wh+M*.22;
+      h+='<g stroke="#d11" stroke-width="'+(lw*2.5)+'"><line x1="'+wx0+'" y1="'+yb+'" x2="'+(wx0+ww)+'" y2="'+yb+'"/><line x1="'+wx0+'" y1="'+(yb-cr)+'" x2="'+wx0+'" y2="'+(yb+cr)+'"/><line x1="'+(wx0+ww)+'" y1="'+(yb-cr)+'" x2="'+(wx0+ww)+'" y2="'+(yb+cr)+'"/></g>';
+      h+='<text x="'+(wx0+ww/2)+'" y="'+(yb+fs*1.25)+'" text-anchor="middle" font-size="'+(fs*.9)+'" font-weight="800" fill="#d11">'+fmt(ww)+' m</text>';}
   }
   if(!o.hl&&!o.num){const tx=lg?'↔ vetas':'↕ vetas',pw=fs*5.4,ph=fs*1.8,cx=M+l/2,cy=M+a/2;
     h+='<rect x="'+(cx-pw/2)+'" y="'+(cy-ph/2)+'" width="'+pw+'" height="'+ph+'" rx="'+(ph/2)+'" fill="#fff" opacity=".9"/><text x="'+cx+'" y="'+(cy+fs*.35)+'" text-anchor="middle" font-size="'+fs+'" font-weight="900" fill="#222">'+tx+'</text>';}
@@ -540,10 +756,10 @@ function stepsData(){
 }
 function explain(){
   const a=S.a,l=S.l,q=m2(),mode=S.mode,D=stepsData();let note='',pv='';
-  if(mode==='area'){{const pl=buildPlan('area',l,a,q/2);if(!pl)note='⚠ Con estas medidas no alcanza el material para armar por área. Conviene priorizar estética (Sí).';else if(pl.some(o=>o.t==='rot'))note='Con estas medidas hay que girar y unir retazos para completar el último pedazo. Por área no importa cómo queden; con estética (Sí) las vetas quedan mejor.'}}
+  if(mode==='area'){{const pl=buildPlan('area',l,a,q/2);if(!pl)note='⚠ Con estas medidas no alcanza el material para armar sin respetar la veta. Conviene elegir «Respetar veta».';else if(pl.some(o=>o.t==='rot'))note='Con estas medidas hay que girar y unir retazos para completar el último pedazo. Sin respetar la veta no importa cómo queden; con «Respetar veta» las vetas quedan mejor.'}}
   else{
     const area=Math.ceil(a*l),sob=q-a*l;
-    note='El cuarto tiene '+fmt(a*l)+' m², <mark class="hl">pero se compran '+q+' m²</mark>: sobran '+fmt(sob)+' m² de retazos. Por área serían '+area+' m² ('+(q-area)+' m² menos), pero habría que unir retazos y el acabado no sería tan uniforme.';
+    note='El cuarto tiene '+fmt(a*l)+' m², <mark class="hl">pero se compran '+q+' m²</mark>: sobran '+fmt(sob)+' m² de retazos. Sin respetar la veta serían '+area+' m² ('+(q-area)+' m² menos), pero habría que unir retazos y el acabado no sería tan uniforme.';
     pv='<div style="max-width:380px;margin:8px auto 0">'+roomSVG(mode,a,l)+'<div class="ex-cap">Así quedan las tiras de 2 m en el cuarto</div></div>';
   }
   return '<div class="ex-title">Cantidad a escribir: <span class="ex-big">'+q+' m²</span></div><ol class="ex-steps">'+D.map((x,i)=>'<li><div class="ex-li"><span>'+x.short+'</span><button type="button" class="ex-btn" onclick="stepOpen('+i+')">Explicar</button></div></li>').join('')+'</ol>'+pv+(note?'<div class="ex-note">'+note+'</div>':'');
@@ -586,7 +802,7 @@ function peso(){$('s-peso').textContent=fmt((parseFloat($('s-q').value)||0)*.59)
 function facturar(){
   const q=parseFloat($('s-q').value);S.bad=true;
   if(!(q>0))S.msg='Escribe la cantidad en m²';
-  else if(S.mode==='area'&&!buildPlan('area',S.l,S.a,Math.ceil(Math.round(S.a*S.l*1e6)/1e6)/2))S.msg='Con estas medidas no alcanza el material por área: prioriza estética (Sí)';
+  else if(S.mode==='area'&&!buildPlan('area',S.l,S.a,Math.ceil(Math.round(S.a*S.l*1e6)/1e6)/2))S.msg='Con estas medidas no alcanza el material sin respetar la veta: elige «Respetar veta»';
   else if(Math.abs(q-m2())>0.005)S.msg='✘ La cantidad no coincide con el cálculo.'+hintMal(q);
   else{resetInstall();S.billed=q;S.step=2;S.A=0;S.done=false;S.msg='';S.bad=false;S.exp=false}
   refresh();
@@ -609,7 +825,6 @@ function refresh(){
   $('s1').style.display=s===1?'flex':'none';
   ['s-chip','s-say','s-tools','s-stage'].forEach(i=>$(i).style.display=s>1?'':'none');
   ['st1','st2','st3'].forEach((id,i)=>$(id).className=i+1===s?'on':(i+1<s?'ok':''));
-  document.querySelector('.app-card').classList.toggle('wide',s>1);
   $('s-formula').innerHTML='<button type="button" class="fx-head" onclick="toggleFx()"><span class="lbl">Cómo hallar los m² (con tus medidas)</span><i class="chev'+(S.fx?' open':'')+'"></i></button>'+(S.fx?'<div class="fx-body">'+fSteps()+'<div style="font-size:12px;color:#8a5a00;margin-top:6px">En resumen: '+f[0]+'. '+f[1]+'</div></div>':'')+'<div class="arr">↓ Ese resultado lo escribes en <b>Cantidad</b></div>';
   $('s-chip').innerHTML='Facturado <b>'+S.billed+' m²</b> · '+NAMES[S.mode];
   const b=(c,t,fn,d)=>'<button class="btn-toggle'+c+'" onclick="'+fn+'"'+(d?' disabled':'')+'>'+t+'</button>';
@@ -620,7 +835,7 @@ function refresh(){
     const op=S.plan[S.k],L=ltr(op.id);
     let t,btn='';
     if(op.t==='cut'){t='Corta la pieza <b>'+L+'</b> a <b>'+fmt(op.at)+' M</b> '+(op.ax==='v'?'desde su borde izquierdo':'desde su borde de arriba');btn=b(' blue','✂️ Cortar','doOp()',S.opDone)}
-    else if(op.t==='rot'){t=S.mode==='area'?'Gira el retazo <b>'+L+'</b> para que encaje en el hueco (por área la veta no importa)':'Gira la pieza <b>'+L+'</b> para que las vetas queden bien';btn=b(' blue','⟳ Girar','doOp()',S.opDone)}
+    else if(op.t==='rot'){t=S.mode==='area'?'Gira el retazo <b>'+L+'</b> para que encaje en el hueco (sin respetar la veta no importa)':'Gira la pieza <b>'+L+'</b> para que las vetas queden bien';btn=b(' blue','⟳ Girar','doOp()',S.opDone)}
     else if(op.t==='fill'){t='Con el retazo <b>'+L+'</b> arma el pedazo que falta de <b>'+fmt(op.w)+' × '+fmt(op.h)+' M</b> (se une con los otros retazos)';btn=b(' blue','✂️ Cortar retazo','doOp()',S.opDone)}
     else t='✋ Arrastra la pieza <b>'+L+'</b> al lugar marcado';
     $('s-say').className='say'+(S.fin||S.opDone?' okk':'');
@@ -822,7 +1037,7 @@ function renderFinal(){
   }
   const sv=$('svg2');sv.setAttribute('viewBox','0 0 '+S.W+' '+S.H);sv.innerHTML=h;check();
 }
-simReset();updVetaNums();
+simReset();calcular();
 </script>
 </body>
 </html>
